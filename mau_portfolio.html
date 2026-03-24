@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Mauricio Bazaldua — Senior Product Designer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #0f0f0f;
+    --ink-2: #3a3a3a;
+    --ink-3: #7a7a7a;
+    --bg: #f9f8f5;
+    --bg-2: #f0ede6;
+    --accent: #1a1a2e;
+    --accent-warm: #c8551b;
+    --border: rgba(0,0,0,0.10);
+    --sans: 'DM Sans', sans-serif;
+    --serif: 'DM Serif Display', serif;
+    --max: 1160px;
+    --pad: clamp(1.5rem, 5vw, 4rem);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 16px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem var(--pad);
+    background: transparent;
+    transition: background 0.4s, border-color 0.4s;
+    border-bottom: 1px solid transparent;
+  }
+  nav.scrolled {
+    background: rgba(249,248,245,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom-color: var(--border);
+  }
+  .nav-logo {
+    font-family: var(--serif);
+    font-size: 1.15rem;
+    color: #fff;
+    text-decoration: none;
+    letter-spacing: -0.01em;
+    transition: color 0.4s;
+  }
+  nav.scrolled .nav-logo { color: var(--ink); }
+  .nav-links { display: flex; gap: 2rem; list-style: none; }
+  .nav-links a {
+    font-size: 0.875rem;
+    font-weight: 400;
+    color: rgba(255,255,255,0.8);
+    text-decoration: none;
+    letter-spacing: 0.02em;
+    transition: color 0.2s;
+  }
+  nav.scrolled .nav-links a { color: var(--ink-2); }
+  .nav-links a:hover { color: #fff; }
+  nav.scrolled .nav-links a:hover { color: var(--accent-warm); }
+  .nav-cta {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #fff;
+    text-decoration: none;
+    border: 1px solid rgba(255,255,255,0.6);
+    padding: 0.45rem 1.1rem;
+    border-radius: 999px;
+    transition: background 0.2s, color 0.2s, border-color 0.4s;
+  }
+  .nav-cta:hover { background: rgba(255,255,255,0.15); }
+  nav.scrolled .nav-cta { color: var(--ink); border-color: var(--ink); }
+  nav.scrolled .nav-cta:hover { background: var(--ink); color: var(--bg); }
+
+  /* ── HERO ── */
+  /* ── HERO GRADIENT WRAPPER ── */
+  .hero-section {
+    position: relative;
+    min-height: 100svh;
+    overflow: hidden;
+    background: linear-gradient(350deg, #e34526, #f7c98c, #512c79, #6b2fef);
+    background-size: 240% 240%;
+    animation: gradient-animation 32s ease infinite;
+  }
+  @keyframes gradient-animation {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  .hero-section::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.42) 100%);
+    pointer-events: none;
+  }
+
+  .hero {
+    position: relative;
+    z-index: 1;
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 9rem var(--pad) 5rem;
+    max-width: var(--max);
+    margin: 0 auto;
+  }
+  .hero-tag {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.75);
+    margin-bottom: 1.75rem;
+  }
+  .hero h1 {
+    font-family: var(--serif);
+    font-size: clamp(3rem, 8vw, 6.5rem);
+    line-height: 1.0;
+    letter-spacing: -0.02em;
+    color: #fff;
+    max-width: 14ch;
+    margin-bottom: 2rem;
+  }
+  .hero h1 em {
+    font-style: italic;
+    color: rgba(255,255,255,0.65);
+  }
+  .hero-desc {
+    font-size: clamp(1rem, 2vw, 1.2rem);
+    font-weight: 300;
+    color: rgba(255,255,255,0.82);
+    max-width: 52ch;
+    line-height: 1.75;
+    margin-bottom: 2.5rem;
+  }
+  .hero-actions { display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; }
+  .btn-primary {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--ink);
+    background: #fff;
+    text-decoration: none;
+    padding: 0.75rem 2rem;
+    border-radius: 999px;
+    transition: background 0.2s, transform 0.15s;
+  }
+  .btn-primary:hover { background: rgba(255,255,255,0.85); transform: translateY(-1px); }
+  .btn-ghost {
+    font-size: 0.875rem;
+    color: rgba(255,255,255,0.8);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: color 0.2s, gap 0.2s;
+  }
+  .btn-ghost:hover { color: #fff; gap: 0.75rem; }
+  .btn-ghost svg { width: 16px; height: 16px; }
+
+  .hero-scroll {
+    margin-top: 5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .scroll-line {
+    width: 40px;
+    height: 1px;
+    background: var(--ink-3);
+  }
+
+  /* ── SECTION WRAPPER ── */
+  section { padding: 6rem var(--pad); }
+  .inner { max-width: var(--max); margin: 0 auto; }
+
+  .section-label {
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--accent-warm);
+    margin-bottom: 1rem;
+    display: block;
+  }
+
+  /* ── WHAT I DO ── */
+  .what { background: var(--accent); }
+  .what .section-label { color: rgba(255,255,255,0.45); }
+  .what h2 {
+    font-family: var(--serif);
+    font-size: clamp(2rem, 4vw, 3rem);
+    color: #fff;
+    max-width: 22ch;
+    line-height: 1.2;
+    margin-bottom: 4rem;
+    letter-spacing: -0.02em;
+  }
+  .what h2 em { font-style: italic; color: rgba(255,255,255,0.5); }
+  .what-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 0;
+    border-top: 1px solid rgba(255,255,255,0.12);
+  }
+  .what-item {
+    padding: 2.5rem 2rem 2.5rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+    border-right: 1px solid rgba(255,255,255,0.12);
+  }
+  .what-item:nth-child(even) { border-right: none; }
+  .what-num {
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    color: rgba(255,255,255,0.3);
+    margin-bottom: 1.25rem;
+  }
+  .what-item h3 {
+    font-family: var(--serif);
+    font-size: 1.35rem;
+    color: #fff;
+    margin-bottom: 0.75rem;
+    line-height: 1.2;
+  }
+  .what-item p {
+    font-size: 0.9rem;
+    font-weight: 300;
+    color: rgba(255,255,255,0.55);
+    line-height: 1.7;
+  }
+
+  /* ── WORK ── */
+  .work-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 3.5rem;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+  .work-header h2 {
+    font-family: var(--serif);
+    font-size: clamp(2rem, 4vw, 3rem);
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+  .work-header p {
+    font-size: 0.9rem;
+    color: var(--ink-3);
+    max-width: 36ch;
+    text-align: right;
+    line-height: 1.6;
+  }
+
+  /* Project cards */
+  .projects { display: flex; flex-direction: column; gap: 2px; }
+
+  .project-card {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 460px;
+    background: var(--bg-2);
+    overflow: hidden;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    transition: background 0.3s;
+    position: relative;
+  }
+  .project-card:hover { background: #e8e4db; }
+  .project-card.reverse { direction: rtl; }
+  .project-card.reverse > * { direction: ltr; }
+
+  .project-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 3rem;
+  }
+  .project-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+  .tag {
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.3rem 0.75rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    color: var(--ink-3);
+  }
+  .tag.accent { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .project-title {
+    font-family: var(--serif);
+    font-size: clamp(1.6rem, 3vw, 2.5rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 1rem;
+  }
+  .project-desc {
+    font-size: 0.925rem;
+    color: var(--ink-2);
+    line-height: 1.75;
+    max-width: 42ch;
+    margin-bottom: 2rem;
+  }
+  .project-impact {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+  .impact-stat { }
+  .impact-num {
+    font-family: var(--serif);
+    font-size: 1.75rem;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+  .impact-label {
+    font-size: 0.75rem;
+    color: var(--ink-3);
+    margin-top: 0.2rem;
+  }
+
+  .project-arrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    color: var(--ink-2);
+    margin-top: 1.5rem;
+    transition: gap 0.2s, color 0.2s;
+  }
+  .project-card:hover .project-arrow { gap: 0.9rem; color: var(--accent-warm); }
+  .project-arrow svg { width: 16px; height: 16px; }
+
+  .project-visual {
+    position: relative;
+    overflow: hidden;
+    background: var(--bg-2);
+  }
+  .project-visual img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.6s ease;
+  }
+  .project-card:hover .project-visual img {
+    transform: scale(1.04);
+  }
+
+  /* Screen mockup inside visual */
+  .mock-screen {
+    width: 72%;
+    max-width: 360px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.12);
+    overflow: hidden;
+  }
+  .mock-bar {
+    height: 36px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 0 12px;
+    background: #f5f5f5;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+  }
+  .mock-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .mock-body { padding: 16px; }
+  .mock-line { height: 8px; border-radius: 4px; background: #e8e8e8; margin-bottom: 8px; }
+  .mock-line.short { width: 55%; }
+  .mock-line.med { width: 80%; }
+  .mock-line.accent { background: #1a1a2e; width: 40%; }
+  .mock-card-row { display: flex; gap: 8px; margin-top: 12px; }
+  .mock-card {
+    flex: 1;
+    height: 56px;
+    border-radius: 8px;
+    background: #f0ede6;
+  }
+
+  /* Halo dark mock */
+  .mock-screen.dark { background: #0d0d1f; }
+  .mock-screen.dark .mock-bar { background: #111127; border-color: rgba(255,255,255,0.06); }
+  .mock-screen.dark .mock-line { background: rgba(255,255,255,0.1); }
+  .mock-screen.dark .mock-line.accent { background: rgba(200,85,27,0.7); }
+  .mock-screen.dark .mock-card { background: rgba(255,255,255,0.05); }
+
+  /* ── ABOUT ── */
+  .about { background: var(--bg-2); }
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5rem;
+    align-items: start;
+  }
+  .about h2 {
+    font-family: var(--serif);
+    font-size: clamp(2rem, 4vw, 3rem);
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin-bottom: 1.75rem;
+  }
+  .about h2 em { font-style: italic; color: var(--ink-3); }
+  .about p {
+    font-size: 1rem;
+    font-weight: 300;
+    color: var(--ink-2);
+    line-height: 1.8;
+    margin-bottom: 1.25rem;
+  }
+  .about-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+  .stat-box {
+    padding: 1.75rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+  }
+  .stat-box .num {
+    font-family: var(--serif);
+    font-size: 2.5rem;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    color: var(--ink);
+    margin-bottom: 0.35rem;
+  }
+  .stat-box .lbl {
+    font-size: 0.8rem;
+    color: var(--ink-3);
+    line-height: 1.4;
+  }
+
+  /* ── TOOLS ── */
+  .tools-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 2.5rem;
+  }
+  .tool-chip {
+    font-size: 0.8rem;
+    font-weight: 400;
+    color: var(--ink-2);
+    padding: 0.4rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--bg);
+  }
+  .tool-chip.ai {
+    background: var(--ink);
+    color: var(--bg);
+    border-color: var(--ink);
+  }
+
+  /* ── CONTACT ── */
+  .contact { text-align: center; }
+  .contact h2 {
+    font-family: var(--serif);
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+    margin-bottom: 1.25rem;
+  }
+  .contact h2 em { font-style: italic; color: var(--ink-3); }
+  .contact p {
+    font-size: 1rem;
+    font-weight: 300;
+    color: var(--ink-3);
+    max-width: 40ch;
+    margin: 0 auto 2.5rem;
+    line-height: 1.75;
+  }
+  .contact-links {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 2rem var(--pad);
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: var(--ink-3);
+    flex-wrap: wrap;
+    gap: 1rem;
+    max-width: var(--max);
+    margin: 0 auto;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .hero h1, .hero-desc, .hero-actions {
+    animation: fadeUp 0.7s ease both;
+  }
+  .hero-desc { animation-delay: 0.1s; }
+  .hero-actions { animation-delay: 0.2s; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    .project-card { grid-template-columns: 1fr; }
+    .project-card.reverse { direction: ltr; }
+    .project-visual { height: 240px; min-height: unset; }
+    .about-grid { grid-template-columns: 1fr; gap: 3rem; }
+    .nav-links { display: none; }
+    .what-item { border-right: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#">Mau Bazaldua</a>
+  <ul class="nav-links">
+    <li><a href="#work">Work</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <a class="nav-cta" href="/cdn-cgi/l/email-protection#9ffaedf6fcf4b1f2feeaedf6fcf6f0b1f8f9dff8f2fef6f3b1fcf0f2">Get in touch</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero-section">
+<div class="hero">
+  <div class="inner">
+    <span class="hero-tag">Senior Product Designer · Oslo, Norway</span>
+    <h1>Hi, I'm <em>Mau.</em></h1>
+    <p class="hero-desc">
+      I design digital products that make complex things feel simple — from data-heavy SaaS platforms to end-to-end user experiences. Currently at Xeneta, building the core of the ocean freight intelligence platform.
+    </p>
+    <div class="hero-actions">
+      <a class="btn-primary" href="#work">View my work</a>
+      <a class="btn-ghost" href="mailto:erick.mauricio.gf@gmail.com">
+        Let's talk
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M3 8h10M9 4l4 4-4 4"/>
+        </svg>
+      </a>
+    </div>
+    <div class="hero-scroll">
+      <div class="scroll-line" style="background:rgba(255,255,255,0.5)"></div>
+      <span style="color:rgba(255,255,255,0.55)">Scroll to explore</span>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+  const nav = document.querySelector('nav');
+  const heroSection = document.querySelector('.hero-section');
+  const observer = new IntersectionObserver(
+    ([entry]) => nav.classList.toggle('scrolled', !entry.isIntersecting),
+    { threshold: 0.05 }
+  );
+  observer.observe(heroSection);
+</script>
+
+<!-- WHAT I DO -->
+<section class="what">
+  <div class="inner">
+    <span class="section-label">What I do</span>
+    <h2>Design that works <em>for people</em> and for business.</h2>
+    <div class="what-grid">
+      <div class="what-item">
+        <div class="what-num">01</div>
+        <h3>Design Systems</h3>
+        <p>I build and manage design systems from scratch — component libraries, tokens, documentation — that give teams consistency and let them ship faster.</p>
+      </div>
+      <div class="what-item">
+        <div class="what-num">02</div>
+        <h3>Data Visualisation</h3>
+        <p>I translate complex, data-heavy problem spaces into clear, intuitive interfaces. Freight rates, dashboards, analytics — I make the numbers meaningful.</p>
+      </div>
+      <div class="what-item">
+        <div class="what-num">03</div>
+        <h3>End-to-End UX</h3>
+        <p>From discovery workshops and user research through prototyping and implementation review — I own the full design lifecycle on every project.</p>
+      </div>
+      <div class="what-item">
+        <div class="what-num">04</div>
+        <h3>AI-Augmented Design</h3>
+        <p>I use AI tools daily — Figma AI, ChatGPT, Claude, Midjourney — to accelerate research synthesis, ideation, and creative exploration.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WORK -->
+<section id="work" style="padding-bottom: 2rem;">
+  <div class="inner">
+    <div class="work-header">
+      <div>
+        <span class="section-label">Selected work</span>
+        <h2>Projects that<br>made a difference.</h2>
+      </div>
+      <p>A selection of case studies across SaaS, B2B, and product design — from concept to shipped.</p>
+    </div>
+
+    <div class="projects">
+
+      <!-- PROJECT 1: CAJA -->
+      <a class="project-card" href="https://maubazaldua.squarespace.com/portfolio/caja" target="_blank">
+        <div class="project-info">
+          <div>
+            <div class="project-meta">
+              <span class="tag accent">OCC Mundial</span>
+              <span class="tag">SaaS · B2B</span>
+              <span class="tag">2020</span>
+            </div>
+            <h2 class="project-title">Create Your First Job Opening</h2>
+            <p class="project-desc">
+              Redesigned the job creation experience for recruiters on Mexico's largest employment platform — reducing friction from first login to first posting.
+            </p>
+            <div class="project-impact">
+              <div class="impact-stat">
+                <div class="impact-num">↑ 38%</div>
+                <div class="impact-label">Completion rate</div>
+              </div>
+              <div class="impact-stat">
+                <div class="impact-num">↓ 2 steps</div>
+                <div class="impact-label">Flow shortened</div>
+              </div>
+            </div>
+          </div>
+          <span class="project-arrow">
+            View case study
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M3 8h10M9 4l4 4-4 4"/>
+            </svg>
+          </span>
+        </div>
+        <div class="project-visual" style="background:#dde8f0;">
+          <img src="https://images.squarespace-cdn.com/content/v1/62e1f6670c9b6758fb1a0ed7/0e76f9f2-ff96-40ac-ae25-7384161ad133/Banner+CAJA.png" alt="Create your first job opening" style="width:100%;height:100%;object-fit:cover;display:block;transition:transform 0.5s ease;"/>
+        </div>
+      </a>
+
+      <!-- PROJECT 2: APPLICANTS MANAGER -->
+      <a class="project-card reverse" href="https://maubazaldua.squarespace.com/portfolio/applicantsmanager" target="_blank">
+        <div class="project-info">
+          <div>
+            <div class="project-meta">
+              <span class="tag accent">OCC Mundial</span>
+              <span class="tag">Dashboard · UX</span>
+              <span class="tag">2021</span>
+            </div>
+            <h2 class="project-title">Applicants Manager</h2>
+            <p class="project-desc">
+              A complete redesign of the recruiter dashboard — making it easier to manage, filter and act on hundreds of job applicants without losing context.
+            </p>
+            <div class="project-impact">
+              <div class="impact-stat">
+                <div class="impact-num">3×</div>
+                <div class="impact-label">Faster candidate review</div>
+              </div>
+              <div class="impact-stat">
+                <div class="impact-num">↑ NPS</div>
+                <div class="impact-label">Recruiter satisfaction</div>
+              </div>
+            </div>
+          </div>
+          <span class="project-arrow">
+            View case study
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M3 8h10M9 4l4 4-4 4"/>
+            </svg>
+          </span>
+        </div>
+        <div class="project-visual" style="background:#1a1a2e;">
+          <img src="https://images.squarespace-cdn.com/content/v1/62e1f6670c9b6758fb1a0ed7/363f29fc-2835-4ffa-8bbe-e1064ae30f00/Banner+Applicants+manager.png" alt="Applicants Manager" style="width:100%;height:100%;object-fit:cover;display:block;transition:transform 0.5s ease;"/>
+        </div>
+      </a>
+
+      <!-- PROJECT 3: PICKPAL -->
+      <a class="project-card" href="https://maubazaldua.squarespace.com/portfolio/pickpal" target="_blank">
+        <div class="project-info">
+          <div>
+            <div class="project-meta">
+              <span class="tag accent">Side Project</span>
+              <span class="tag">Mobile · Consumer</span>
+              <span class="tag">2022</span>
+            </div>
+            <h2 class="project-title">PickPal</h2>
+            <p class="project-desc">
+              A mobile app concept that helps groups make decisions together — designed from zero, validated with real users, and shipped as a working prototype.
+            </p>
+            <div class="project-impact">
+              <div class="impact-stat">
+                <div class="impact-num">0 → 1</div>
+                <div class="impact-label">Full 0-to-1 design</div>
+              </div>
+              <div class="impact-stat">
+                <div class="impact-num">iOS & Android</div>
+                <div class="impact-label">Cross-platform</div>
+              </div>
+            </div>
+          </div>
+          <span class="project-arrow">
+            View case study
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M3 8h10M9 4l4 4-4 4"/>
+            </svg>
+          </span>
+        </div>
+        <div class="project-visual" style="background:#1a1f14;">
+          <img src="https://images.squarespace-cdn.com/content/v1/62e1f6670c9b6758fb1a0ed7/917ab69b-632a-469b-8b77-9c8fbbcf35a2/Banner+Pickpal.png" alt="PickPal" style="width:100%;height:100%;object-fit:cover;display:block;transition:transform 0.5s ease;"/>
+        </div>
+      </a>
+
+      <!-- PROJECT 4: HALO WAYPOINT -->
+      <a class="project-card reverse" href="https://maubazaldua.squarespace.com/portfolio/halowaypoint" target="_blank">
+        <div class="project-info">
+          <div>
+            <div class="project-meta">
+              <span class="tag" style="border-color:rgba(255,255,255,0.2);color:rgba(255,255,255,0.45)">Side Project</span>
+              <span class="tag" style="border-color:rgba(255,255,255,0.2);color:rgba(255,255,255,0.45)">Gaming · Web</span>
+              <span class="tag" style="border-color:rgba(255,255,255,0.2);color:rgba(255,255,255,0.45)">2022</span>
+            </div>
+            <h2 class="project-title" style="color:#fff;">Halo Waypoint 2.0</h2>
+            <p class="project-desc" style="color:rgba(255,255,255,0.55);">
+              A passion-project redesign of the official Halo companion platform — reimagining player stats, match history, and community features for a modern audience.
+            </p>
+            <div class="project-impact" style="border-top-color:rgba(255,255,255,0.12)">
+              <div class="impact-stat">
+                <div class="impact-num" style="color:#fff;">Full redesign</div>
+                <div class="impact-label" style="color:rgba(255,255,255,0.4)">Web platform</div>
+              </div>
+              <div class="impact-stat">
+                <div class="impact-num" style="color:#fff;">Concept</div>
+                <div class="impact-label" style="color:rgba(255,255,255,0.4)">Speculative project</div>
+              </div>
+            </div>
+          </div>
+          <span class="project-arrow" style="color:rgba(255,255,255,0.4)">
+            View case study
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M3 8h10M9 4l4 4-4 4"/>
+            </svg>
+          </span>
+        </div>
+        <div class="project-visual" style="background:#0a0a1a;">
+          <img src="https://images.squarespace-cdn.com/content/v1/62e1f6670c9b6758fb1a0ed7/c7028bb5-c180-47ee-b08c-ea1fdefc3c39/Banner+Pickpal.png" alt="Halo Waypoint 2.0" style="width:100%;height:100%;object-fit:cover;display:block;transition:transform 0.5s ease;"/>
+        </div>
+      </a>
+
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about" class="about">
+  <div class="inner">
+    <div class="about-grid">
+      <div>
+        <span class="section-label">About me</span>
+        <h2>Designing with <em>purpose</em> since 2015.</h2>
+        <p>I'm a Senior Product Designer with 9+ years of experience building digital products that balance user needs with business goals. Currently at Xeneta in Oslo, where I lead design on the Ocean Core platform and manage the company's design system.</p>
+        <p>I care deeply about the craft — from the clarity of a single interaction to the scalability of a design system. I use AI tools daily as part of my process, not as a shortcut, but as a way to think faster and explore further.</p>
+        <div class="tools-row">
+          <span class="tool-chip ai">Figma AI</span>
+          <span class="tool-chip ai">ChatGPT</span>
+          <span class="tool-chip ai">Claude</span>
+          <span class="tool-chip ai">Midjourney</span>
+          <span class="tool-chip">Figma</span>
+          <span class="tool-chip">Miro</span>
+          <span class="tool-chip">After Effects</span>
+          <span class="tool-chip">Illustrator</span>
+        </div>
+      </div>
+      <div class="about-stats">
+        <div class="stat-box">
+          <div class="num">9+</div>
+          <div class="lbl">Years of product design experience</div>
+        </div>
+        <div class="stat-box">
+          <div class="num">4</div>
+          <div class="lbl">Companies across 3 countries</div>
+        </div>
+        <div class="stat-box">
+          <div class="num">1</div>
+          <div class="lbl">Design system built from scratch at Xeneta</div>
+        </div>
+        <div class="stat-box">
+          <div class="num">∞</div>
+          <div class="lbl">Problems worth solving</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact" class="contact">
+  <div class="inner">
+    <span class="section-label">Get in touch</span>
+    <h2>Let's build<br>something <em>great.</em></h2>
+    <p>Open to new opportunities, collaborations, and interesting conversations about design.</p>
+    <div class="contact-links">
+      <a class="btn-primary" href="/cdn-cgi/l/email-protection#e1849388828acf8c8094938882888ecf8687a1868c80888dcf828e8c">Send me an email</a>
+      <a class="btn-ghost" href="https://maubazaldua.squarespace.com" target="_blank">
+        View full portfolio
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:16px;height:16px">
+          <path d="M3 8h10M9 4l4 4-4 4"/>
+        </svg>
+      </a>
+    </div>
+  <
