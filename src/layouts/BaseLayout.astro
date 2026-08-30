@@ -26,6 +26,14 @@ const { title, noChrome = false } = Astro.props;
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title} — Mauricio Bazaldua</title>
+    <!-- On-brand favicon — dark tile (--home-bg), the same "M" the brand
+         mark leads with, in the sitewide accent (--home-accent). SVG is
+         the primary icon (crisp at any size, and modern browsers prefer
+         it); the PNGs are the fallback for browsers/contexts that don't
+         support SVG favicons and for iOS's home-screen icon. -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <!-- Scroll-reveal ([data-reveal], see global.css) is hidden by default
          and needs JS to add the .is-visible class. With JS disabled that
          would hide content permanently, so this unconditionally overrides
