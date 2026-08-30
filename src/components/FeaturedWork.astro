@@ -1,0 +1,237 @@
+---
+// The Home page's single spotlighted project — a bigger, editorial
+// treatment for the one project the user most wants to lead with (added
+// 28 Aug 2026 for Compass Design System). Distinct from WorkListItem.astro
+// in every dimension that matters for a spotlight: no number badge, a
+// much larger image at its own ratio (not the list's 240px/4:3 thumbnail),
+// the project's real metrics surfaced as stat tiles instead of buried in
+// a caption line. Pulled out of the "More work" list entirely so it isn't
+// shown twice — see index.astro.
+import { Image } from "astro:assets";
+import type { ImageMetadata } from "astro";
+
+interface Metric {
+  label: string;
+  value: string;
+}
+
+interface Props {
+  slug: string;
+  title: string;
+  oneLiner: string;
+  company?: string;
+  role: string;
+  timeline: string;
+  metrics: Metric[];
+  image: { src: ImageMetadata; alt: string };
+}
+
+const { slug, title, oneLiner, company, role, timeline, metrics, image } = Astro.props;
+const href = `/work/${slug}`;
+const captionParts = [company, role, timeline].filter(Boolean);
+---
+
+<section class="featured" id="work" aria-label="Featured work">
+  <div class="featured__inner">
+    <div class="featured__text">
+      <p class="featured__eyebrow">Featured work</p>
+      <h3 class="featured__title">
+        <a href={href}>{title}</a>
+      </h3>
+      <p class="featured__one-liner">{oneLiner}</p>
+      <p class="featured__caption">{captionParts.join(" · ")}</p>
+
+      {metrics.length > 0 && (
+        <dl class="featured__metrics">
+          {metrics.map((metric) => (
+            <div class="featured__metric">
+              <dt>{metric.value}</dt>
+              <dd>{metric.label}</dd>
+            </div>
+          ))}
+        </dl>
+      )}
+
+      <a class="featured__cta" href={href}>
+        View case study
+        <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </a>
+    </div>
+
+    <a class="featured__image-link" href={href} tabindex="-1" aria-hidden="true">
+      <Image
+        src={image.src}
+        alt=""
+        widths={[640, 960, 1400]}
+        sizes="(min-width: 900px) 55vw, 100vw"
+        class="featured__image"
+      />
+    </a>
+  </div>
+</section>
+
+<style>
+  .featured {
+    position: relative;
+    z-index: 1;
+    background: var(--home-bg);
+    color: var(--home-fg);
+    padding: var(--space-9) var(--space-5);
+    border-top: 1px solid var(--home-border);
+    border-bottom: 1px solid var(--home-border);
+  }
+
+  .featured__inner {
+    max-width: var(--container-max-wide);
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+    gap: var(--space-8);
+    align-items: center;
+  }
+
+  .featured__eyebrow {
+    font-family: var(--font-display);
+    font-size: var(--text-small);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--home-accent);
+    margin: 0 0 var(--space-4);
+  }
+
+  .featured__title {
+    margin: 0 0 var(--space-4);
+  }
+
+  .featured__title a {
+    font-family: var(--font-display);
+    font-size: var(--text-headline);
+    font-weight: 600;
+    line-height: var(--leading-tight);
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    color: var(--home-fg);
+    text-decoration: none;
+    transition: color 0.3s var(--ease-out-expo);
+  }
+
+  .featured__title a:hover,
+  .featured__title a:focus-visible {
+    color: var(--home-accent);
+  }
+
+  .featured__one-liner {
+    color: var(--home-fg-muted);
+    max-width: 46ch;
+    margin: 0 0 var(--space-4);
+  }
+
+  .featured__caption {
+    font-family: var(--font-display);
+    font-size: var(--text-small);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--home-fg-tertiary);
+    margin: 0 0 var(--space-6);
+  }
+
+  .featured__metrics {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-8);
+    margin: 0 0 var(--space-7);
+  }
+
+  .featured__metric {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .featured__metric dt {
+    font-family: var(--font-display);
+    font-size: var(--text-numeral);
+    font-weight: 500;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    color: var(--home-accent);
+    margin: 0;
+  }
+
+  .featured__metric dd {
+    font-size: var(--text-small);
+    color: var(--home-fg);
+    white-space: nowrap;
+    margin: 0;
+  }
+
+  .featured__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-6);
+    border: 1px solid var(--home-accent);
+    border-radius: var(--radius-full);
+    font-family: var(--font-display);
+    font-size: var(--text-small);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--home-accent);
+    text-decoration: none;
+    transition: background-color 0.3s var(--ease-out-expo), color 0.3s var(--ease-out-expo);
+  }
+
+  .featured__cta svg {
+    width: 16px;
+    height: 16px;
+    transition: transform 0.3s var(--ease-out-expo);
+  }
+
+  .featured__cta:hover,
+  .featured__cta:focus-visible {
+    background-color: var(--home-accent);
+    color: var(--home-bg);
+  }
+
+  .featured__cta:hover svg,
+  .featured__cta:focus-visible svg {
+    transform: translateX(2px);
+  }
+
+  .featured__image-link {
+    display: block;
+    border-radius: var(--radius-md);
+  }
+
+  .featured__image {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 5 / 4;
+    object-fit: cover;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--home-border);
+    transition: transform 0.5s var(--ease-out-expo);
+  }
+
+  .featured__image-link:hover .featured__image,
+  .featured__image-link:focus-visible .featured__image {
+    transform: scale(1.02);
+  }
+
+  @media (max-width: 900px) {
+    .featured__inner {
+      grid-template-columns: 1fr;
+    }
+
+    .featured__image-link {
+      order: -1;
+    }
+
+    .featured__image {
+      aspect-ratio: 4 / 3;
+    }
+  }
+</style>

@@ -1,0 +1,442 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import FloatingNav from "../components/FloatingNav.astro";
+import WorkListItem from "../components/WorkListItem.astro";
+import FeaturedWork from "../components/FeaturedWork.astro";
+import ContactSection from "../components/ContactSection.astro";
+
+const allProjects = (await getCollection("work", ({ data }) => !data.draft)).sort(
+  (a, b) => a.data.priority - b.data.priority
+);
+
+// Compass Design System gets its own spotlight section (design systems are
+// the work the user most wants to lead with) — pulled out of the numbered
+// list below so it isn't shown twice. See FeaturedWork.astro.
+const featuredSlug = "compass-design-system";
+const featuredProject = allProjects.find((project) => project.id === featuredSlug)!;
+const projects = allProjects.filter((project) => project.id !== featuredSlug);
+
+// Deterministic (seeded) star-map generation — same output every build, no
+// client-side JS needed to draw it. A faint scatter of stars plus a few
+// concentric "chart" rings, rendered as one inline SVG, rotated slowly via
+// CSS. Reference: Destiny 2's title screen background.
+function seededRandom(seed: number) {
+  let value = seed;
+  return () => {
+    value = (value * 1103515245 + 12345) & 0x7fffffff;
+    return value / 0x7fffffff;
+  };
+}
+
+const rand = seededRandom(42);
+const stars = Array.from({ length: 55 }, () => ({
+  cx: Number((rand() * 100).toFixed(2)),
+  cy: Number((rand() * 100).toFixed(2)),
+  r: Number((0.08 + rand() * 0.14).toFixed(2)),
+  opacity: Number((0.25 + rand() * 0.35).toFixed(2)),
+}));
+
+const rings = [16, 27, 40, 55].map((r, i) => ({
+  r,
+  opacity: 0.09 - i * 0.018,
+}));
+---
+
+<BaseLayout title="Home" noChrome>
+  <FloatingNav />
+
+  <section class="hero">
+    <svg class="hero__starmap" aria-hidden="true" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice">
+      {rings.map((ring) => (
+        <circle cx="50" cy="75" r={ring.r} fill="none" stroke="var(--home-fg)" stroke-width="0.08" opacity={ring.opacity} />
+      ))}
+      {stars.map((star) => (
+        <circle cx={star.cx} cy={star.cy} r={star.r} fill="var(--home-fg)" opacity={star.opacity} />
+      ))}
+    </svg>
+    <div class="hero__glow" aria-hidden="true"></div>
+    <div class="hero__content">
+      <p class="hero__eyebrow">Senior Product Designer</p>
+      <h1 class="hero__name"><span class="hero__name-accent">Mau</span> Bazaldua</h1>
+      <p class="hero__subtitle">
+        8+ years starting from the customer and working backward, then
+        owning it through what ships.
+      </p>
+    </div>
+    <a class="hero__scroll-cue" href="#work">
+      Scroll to see my work
+      <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M3 6l5 5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+    </a>
+  </section>
+
+  {featuredProject.data.heroImage && (
+    <FeaturedWork
+      slug={featuredProject.id}
+      title={featuredProject.data.title}
+      oneLiner={featuredProject.data.oneLiner}
+      company={featuredProject.data.company}
+      role={featuredProject.data.role}
+      // Hardcoded rather than reading featuredProject.data.timeline — the
+      // Home spotlight and the case-study page's own meta row intentionally
+      // show different timeline text (this stays "May 2024"; the case
+      // study says "May 2024 - Ongoing"). See content/work/compass-design-system.md.
+      timeline="May 2024"
+      metrics={[
+        { value: "40+", label: "Components shipped" },
+        { value: "100+", label: "Variants" },
+      ]}
+      image={featuredProject.data.thumbnail ?? featuredProject.data.heroImage}
+    />
+  )}
+
+  <section class="work" aria-label="Selected work">
+    <div class="work__intro">
+      <h2 class="work__headline">More work.</h2>
+    </div>
+    <div class="work__list">
+      {projects.map((project, i) => (
+        <WorkListItem
+          index={i + 1}
+          slug={project.id}
+          title={project.data.title}
+          oneLiner={project.data.oneLiner}
+          company={project.data.company}
+          role={project.data.role}
+          timeline={project.data.timeline}
+          image={project.data.thumbnail ?? project.data.heroImage}
+        />
+      ))}
+    </div>
+  </section>
+
+  <ContactSection />
+</BaseLayout>
+
+<style>
+  .hero {
+    position: sticky;
+    top: 0;
+    z-index: 0;
+    min-height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: var(--home-bg);
+    color: var(--home-fg);
+    padding: var(--space-6) var(--space-5);
+  }
+
+  .hero__starmap {
+    position: absolute;
+    inset: -25%;
+    width: 150%;
+    height: 150%;
+    opacity: 0.6;
+    animation: map-rotate 240s linear infinite;
+    transform-origin: 50% 85%;
+    pointer-events: none;
+  }
+
+  @keyframes map-rotate {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero__starmap {
+      animation: none;
+    }
+  }
+
+  .hero__glow {
+    position: absolute;
+    inset: -20%;
+    background:
+      radial-gradient(circle at 50% 105%, var(--home-glow-1) 0%, transparent 45%),
+      radial-gradient(circle at 62% 95%, var(--home-glow-2) 0%, transparent 60%);
+    opacity: 0.55;
+    filter: blur(70px);
+    animation: drift 36s ease-in-out infinite alternate, beacon 7s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  @keyframes drift {
+    0% {
+      transform: translate(-2%, -1%) scale(1);
+    }
+    100% {
+      transform: translate(2%, 2%) scale(1.06);
+    }
+  }
+
+  /* Beacon: a slow brightness breathe layered on top of the positional
+     drift above — independent property (opacity vs. transform), so both
+     animations run concurrently without conflict. */
+  @keyframes beacon {
+    0%,
+    100% {
+      opacity: 0.4;
+    }
+    50% {
+      opacity: 0.68;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero__glow {
+      animation: none;
+    }
+  }
+
+  .hero__content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+  }
+
+  /* Eyebrow + name fade in together as the first beat, then the subtitle
+     follows on its own delay — a slower, more deliberate arrival than a
+     single simultaneous fade. All three re-trigger together via the
+     shared .hero__content.is-visible toggle (see the script below), so
+     the sequence replays each time a visitor scrolls back into the hero,
+     not just on first load. */
+  .hero__eyebrow,
+  .hero__name,
+  .hero__subtitle {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 1.3s var(--ease-out-expo), transform 1.3s var(--ease-out-expo);
+  }
+
+  .hero__content.is-visible .hero__eyebrow,
+  .hero__content.is-visible .hero__name {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .hero__content.is-visible .hero__subtitle {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 0.45s;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero__eyebrow,
+    .hero__name,
+    .hero__subtitle {
+      transition: none;
+      transition-delay: 0s;
+    }
+  }
+
+  .hero__eyebrow {
+    font-size: var(--text-body);
+    font-weight: 500;
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--home-fg-muted);
+    margin: 0 0 var(--space-3);
+  }
+
+  .hero__name {
+    font-family: var(--font-display);
+    font-size: var(--text-display);
+    font-weight: 700;
+    line-height: var(--leading-tight);
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    margin: 0 0 var(--space-4);
+    text-wrap: balance;
+  }
+
+  .hero__name-accent {
+    color: var(--home-accent);
+  }
+
+  .hero__subtitle {
+    font-size: var(--text-title);
+    color: var(--home-fg-muted);
+    max-width: 34ch;
+    margin: 0 auto;
+  }
+
+  .hero__scroll-cue {
+    position: absolute;
+    inset-inline: 0;
+    bottom: var(--space-6);
+    z-index: 1;
+    width: fit-content;
+    margin-inline: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-5);
+    border: 1px solid var(--home-border);
+    border-radius: var(--radius-full);
+    font-size: var(--text-small);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--home-fg-muted);
+    text-decoration: none;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.9s var(--ease-out-expo) 0.4s, border-color 0.2s var(--ease-out-expo), color 0.2s var(--ease-out-expo);
+  }
+
+  .hero__scroll-cue svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  .hero__scroll-cue.is-visible {
+    opacity: 1;
+  }
+
+  /* Declared after .is-visible: when both classes are present (the state
+     reached once the visitor starts scrolling), this wins on source order,
+     fading the cue out without needing !important. pointer-events blocks
+     clicks immediately; visibility is transitioned at the same duration as
+     opacity so the element only leaves tab order once it's actually
+     finished fading, not abruptly mid-fade. */
+  .hero__scroll-cue.is-scrolled {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.4s var(--ease-out-expo), visibility 0s linear 0.4s;
+  }
+
+  .hero__scroll-cue:hover,
+  .hero__scroll-cue:focus-visible {
+    border-color: var(--home-accent);
+    color: var(--home-fg);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero__scroll-cue {
+      transition: opacity 0.2s var(--ease-out-expo);
+    }
+
+    .hero__scroll-cue.is-scrolled {
+      transition: opacity 0.2s var(--ease-out-expo), visibility 0s linear 0.2s;
+    }
+  }
+
+  .work {
+    position: relative;
+    z-index: 1;
+    background: var(--home-bg);
+    color: var(--home-fg);
+    /* Top/bottom padding is the exact 80px gap to the section on each
+       side (Featured above, Contact below) — each section owns only its
+       own top padding for this, never split, so the two never compound. */
+    padding: 80px var(--space-5) 0;
+  }
+
+  .work__intro {
+    max-width: var(--container-max-wide);
+    margin: 0 auto var(--space-8);
+  }
+
+  .work__headline {
+    font-family: var(--font-display);
+    font-size: var(--text-display);
+    font-weight: 700;
+    line-height: var(--leading-tight);
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    margin: 0 0 var(--space-4);
+    max-width: 20ch;
+    text-wrap: balance;
+  }
+
+  .work__list {
+    max-width: var(--container-max-wide);
+    margin: 0 auto;
+  }
+</style>
+
+<script>
+  import Lenis from "lenis";
+
+  // Eased/inertial scroll — matches the reference site's non-linear feel.
+  // Skipped entirely under prefers-reduced-motion, same as every other
+  // motion addition on this page: native, instant scroll stays the default
+  // for anyone who's asked for reduced motion, not just a faster easing.
+  // Lenis (in its default configuration) drives the real window scroll
+  // position each frame rather than virtualizing scroll on a transformed
+  // wrapper — real `scrollTop`/`scrollY` changes are what keep
+  // `position: sticky` (the hero's pin-and-cover effect) and the existing
+  // `window.scrollY`-based scroll-cue logic below both working unmodified.
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let lenis: Lenis | null = null;
+
+  if (!reduceMotion) {
+    lenis = new Lenis();
+    const raf = (time: number) => {
+      lenis?.raf(time);
+      requestAnimationFrame(raf);
+    };
+    requestAnimationFrame(raf);
+  }
+
+  const hero = document.querySelector<HTMLElement>(".hero");
+  const content = document.querySelector<HTMLElement>(".hero__content");
+  const scrollCue = document.querySelector<HTMLElement>(".hero__scroll-cue");
+  const navWorks = document.querySelector<HTMLElement>("[data-nav-works]");
+  const navContact = document.querySelector<HTMLElement>("[data-nav-contact]");
+
+  // When Lenis owns the scroll, route each link's anchor click through it
+  // so the jump is eased too, instead of colliding with a native
+  // instant/CSS-smooth jump mid-animation. Falls through to the plain
+  // anchor default (paired with global.css's `scroll-behavior: smooth`)
+  // when Lenis isn't active. The cue and Works both target #work; Contact
+  // targets #contact (ContactSection, at the bottom of the page).
+  if (lenis) {
+    const routed: [HTMLElement | null, string][] = [
+      [scrollCue, "#work"],
+      [navWorks, "#work"],
+      [navContact, "#contact"],
+    ];
+    for (const [link, selector] of routed) {
+      link?.addEventListener("click", (event) => {
+        const target = document.querySelector<HTMLElement>(selector);
+        if (!target) return;
+        event.preventDefault();
+        lenis?.scrollTo(target);
+      });
+    }
+  }
+
+  if (hero && content) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          content.classList.toggle("is-visible", entry.isIntersecting);
+          scrollCue?.classList.toggle("is-visible", entry.isIntersecting);
+        }
+      },
+      { threshold: 0.35 },
+    );
+    observer.observe(hero);
+  }
+
+  // The scroll cue fades out as soon as the visitor actually starts
+  // scrolling (a separate, scroll-position-driven state from the
+  // intersection-based fade-in above — see the .is-scrolled CSS rule for
+  // why it's declared after .is-visible rather than needing !important).
+  if (scrollCue) {
+    const onScroll = () => {
+      scrollCue.classList.toggle("is-scrolled", window.scrollY > 24);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+  }
+</script>

@@ -1,0 +1,44 @@
+---
+// Home's minimal nav — Works, Contact (About removed 29 Aug 2026). Both
+// scroll to a section on this same page (index.astro's script routes the
+// click through Lenis, same as the hero's scroll-cue) — Works to the
+// project list (#work), Contact to the ContactSection at the bottom
+// (#contact, added 30 Aug 2026 — was a mailto link straight to the inbox,
+// now lands on the section with Email/Resume/LinkedIn so a visitor picks
+// how to reach out). href values are the native fallback when Lenis is
+// off (reduced motion) or JS hasn't run yet.
+---
+
+<nav class="floating-nav" aria-label="Primary">
+  <a href="#work" data-nav-works>Works</a>
+  <a href="#contact" data-nav-contact>Contact</a>
+</nav>
+
+<style>
+  .floating-nav {
+    position: fixed;
+    top: var(--space-5);
+    right: var(--space-5);
+    z-index: 10;
+    display: flex;
+    gap: var(--space-5);
+  }
+
+  .floating-nav a {
+    font-family: var(--font-sans);
+    font-size: var(--text-small);
+    color: var(--home-fg-muted);
+    text-decoration: none;
+    transition: color 0.2s var(--ease-out-expo);
+  }
+
+  .floating-nav a:hover,
+  .floating-nav a:focus-visible {
+    color: var(--home-fg);
+  }
+
+  .floating-nav a:focus-visible {
+    outline: 2px solid var(--home-accent);
+    outline-offset: 4px;
+  }
+</style>

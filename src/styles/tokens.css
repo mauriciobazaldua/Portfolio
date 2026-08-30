@@ -1,0 +1,195 @@
+/*
+ * Design foundations.
+ *
+ * This file exists so every component pulls color/type/space from one place.
+ * Nothing in src/ should hardcode a color, font, or spacing value directly;
+ * everything should reference one of these custom properties.
+ *
+ * Direction: the homepage ("Destiny-elegant hero + Karan-style project
+ * list" — see the contract comment in BaseLayout.astro) is a full redesign,
+ * not an extension of the retired "Title Screen" world. If you find a
+ * three-destination sliding-selector menu, or `--blueprint-*` tokens from
+ * an even earlier retired world, that's drift — remove it.
+ */
+
+:root {
+  /* Color — one fixed dark/warm world, sitewide. Was two systems (Home
+     fixed, everything else adaptive light/dark with a blue accent) until
+     25 Aug 2026 — the user said the split read as two different sites and
+     asked to unify under Home's palette everywhere, not adaptively, on
+     purpose (same trade-off Home itself already made: no light-mode
+     option). --home-* is the source of truth; --color-* aliases it below
+     so every existing component keeps working unchanged. See DESIGN.md. */
+  --home-bg: #131313;
+  --home-bg-deep: #050504;
+  --home-fg: #dcdcdc;
+  --home-fg-muted: #928c80;
+  /* Dimmer/more neutral than --home-fg-muted's warm greige — for tertiary
+     metadata (the work-list row's Company/Role/Timeline caption) that
+     should read as one step further back than the one-liner above it. */
+  --home-fg-tertiary: #6f6c66;
+  --home-border: rgba(245, 242, 234, 0.12);
+  --home-accent: #e0a458;
+  --home-glow-1: #e0a458;
+  --home-glow-2: #7a3d1e;
+
+  /* Sitewide alias — every non-Home page (About, case studies) reads
+     these, same values as Home. Not adaptive: no prefers-color-scheme
+     override exists anymore. Kept as separate names (not a find/replace
+     to --home-*) so components read by role (a case-study's "border,"
+     not literally "Home's border") and so this alias is one place to
+     touch if that ever needs to change again. */
+  --color-bg: var(--home-bg);
+  --color-surface: var(--home-bg-deep);
+  --color-fg: var(--home-fg);
+  --color-accent: var(--home-accent);
+
+  /* 25 Aug 2026: bg went from #0a0908 to #131313 and fg from a warm
+     #f5f2ea to a neutral #dcdcdc — the user asked for less harsh
+     contrast, applied sitewide including Home. --home-accent and
+     --home-fg-muted (both still warm-toned) were deliberately NOT
+     touched — only background and the primary text color changed. */
+
+  /* Case-study foundations, added 25 Aug 2026 alongside a real Figma
+     spec for the case-study template (see DESIGN.md). Not aliased to
+     --home-* since they don't originate from Home's own design and
+     Home doesn't use them.
+     --color-fg-bright: the second, brighter white the Figma actually
+     uses for headings/emphasis (Home's --color-fg/#dcdcdc is the softer
+     "Light text" role; #f9f9f9 is "Text") — two shades, not one.
+     --color-caption: neutral muted label/caption color, shared by
+     sitewide chrome (Header/Footer nav links) and case-study labels —
+     distinct from Home's own warm --home-fg-muted, which Home keeps.
+     --color-surface-card: KPI card fill.
+     --case-accent: per-project TEXT accent (see Colors in DESIGN.md) —
+     defaults to the sitewide orange, overridden inline per case study
+     via a `style` attribute when a project has its own brand color
+     (e.g. OCC's blue). Interactive elements (links, hovers, focus
+     rings) always use --color-accent, never --case-accent — the split
+     is deliberate, per the user's explicit instruction. */
+  --color-fg-bright: #f9f9f9;
+  --color-caption: #999999;
+  --color-surface-card: #1c1c1c;
+  --color-border: #282828;
+  --case-accent: var(--color-accent);
+  /* Gap between the nav bar and the case-study title, replacing the
+     "Back to home" link Figma doesn't have — 25 Aug 2026, the user's
+     explicit value (multiple of 8, fits the spacing rule). */
+  --case-title-gap: 80px;
+  /* The vertical rhythm between every top-level section/image on a
+     case-study page, and between a step's own text and its inline
+     image(s) — confirmed against Figma (a labeled 80px gap between the
+     main image and the Brief section). Applied via the .case-study/
+     .brief/.case-process/.step "> * + *" rules in global.css, not per
+     component, so it can't be accidentally set in two places at once.
+     See DESIGN.md. */
+  --case-section-gap: 80px;
+  /* Translucent bg-toned scrim for text overlaid on photography (before/
+     after slider pills, testing-badge overlay) — same hue as --home-bg,
+     not an arbitrary black. */
+  --color-scrim: rgba(19, 19, 19, 0.72);
+
+  /* Typography — one semantic scale, sitewide. Six named roles, not a raw
+     pixel ladder: each has a single reason to exist and a fixed job. Don't
+     add a seventh without a real, distinct use — see DESIGN.md's
+     Typography section.
+     ACCESSIBILITY FLOOR: --text-small (0.875rem/14px) is the smallest size
+     anywhere on the site, and must never drop below 0.75rem/12px — general
+     WCAG-adjacent legibility guidance, not a specific WCAG success
+     criterion, but treated as a hard floor here regardless. Don't add a
+     smaller token; if something reads as "just a caption," --text-small
+     is still the answer, not a new, smaller one. */
+  --font-sans: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Space Grotesk", "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  --text-small: 0.875rem;
+  --text-body: 1rem;
+  --text-title: 1.75rem;
+  --text-numeral: 2.5rem;
+  --text-headline: clamp(2rem, 4vw + 1rem, 3.5rem);
+  --text-display: clamp(3rem, 6vw + 1rem, 6rem);
+
+  --leading-tight: 1.1;
+  --leading-normal: 1.6;
+  --tracking-label: 0.02em;
+  --tracking-wide: 0.06em;
+
+  /* Case-study type system — added 25 Aug 2026, pixel-exact from the
+     user's Figma ("the text styles that I used... in all website"). A
+     separate --type-* prefix rather than reusing --text-* names on
+     purpose: "Title" here (96/124) is a different role than the
+     existing --text-title (28px, sitewide h2), and remapping every
+     --text-* consumer sitewide risked regressing Home's already-shipped,
+     approved hero. Case-study components (CaseStudyLayout/Step/KPIs)
+     use --type-*; Home and existing chrome keep --text-* untouched.
+     See DESIGN.md's Typography section for the full mapping table. */
+  --type-caption-size: 0.75rem;   /* 12px — "Caption" */
+  --type-caption-line: 1rem;      /* 16px */
+  --type-body-sm-size: 0.875rem;  /* 14px — "Paragraph regular" */
+  --type-body-sm-line: 1.25rem;   /* 20px */
+  --type-label-size: 0.875rem;    /* 14px — "Subtitle big" (smaller than
+                                      "Subtitle" despite the name —
+                                      confirmed against real Figma usage,
+                                      not just the reference image) */
+  --type-label-line: 1.25rem;     /* 20px */
+  --type-body-lg-size: 1rem;      /* 16px — "Paragraph large" */
+  --type-body-lg-line: 1.5rem;    /* 24px */
+  --type-body-size: 1.125rem;     /* 18px — "Paragraph normal" */
+  --type-body-line: 1.875rem;     /* 30px */
+  --type-subtitle-size: 1.5rem;   /* 24px — "Subtitle" */
+  --type-subtitle-line: 2rem;     /* 32px */
+  --type-title-size: clamp(2.5rem, 5vw + 1rem, 6rem); /* "Title", caps at 96px */
+  --type-title-line: 1.2917;      /* 124/96 */
+  --type-quote-size: 2rem;        /* 32px — bespoke, pull-quote only */
+  --type-quote-line: 3rem;        /* 48px */
+  --type-stat-size: 4rem;         /* 64px — bespoke, KPI stat value only */
+  --type-stat-line: 4rem;
+  --tracking-caption: 0.1em;      /* Caption + Subtitle-big tracking */
+
+  /* Spacing scale */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+  --space-9: 6rem;
+  --space-10: 9rem;
+
+  /* Shape */
+  --radius-xs: 2px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-full: 999px;
+  /* Case-study cards/borders (meta boxes, KPI cards, key-problem cards,
+     Contact button) use a Figma-exact 8px — between --radius-sm and
+     --radius-md, not a substitute for either. Added 25 Aug 2026. */
+  --radius-case: 8px;
+
+  /* Motion */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Layout — three container widths, one shared gutter. Reading pages
+     (About, case-study prose) use the narrowest; hub/list pages (Home)
+     use the middle one; --container-max-full is for imagery specifically
+     — added 25 Aug 2026 because 1088px read as small for screenshots
+     that are "the whole point of the portfolio." Text never uses the
+     full tier — legibility still caps prose at --container-max. See
+     DESIGN.md's Layout section. */
+  --container-max: 720px;
+  --container-max-wide: 68rem;
+  --container-max-full: 100rem;
+  --container-padding: var(--space-5);
+
+  /* 12-column grid, case-study ("Use case") pages only — added 25 Aug
+     2026 per the user's exact spec: 60px side margins, 12 columns,
+     24px gutter. Capped 25 Aug 2026 at a fixed 1280px max-width (the
+     user's explicit value, not reused from --container-max-wide) so it
+     stops growing past that on wide monitors. See .grid-12 in global.css. */
+  --grid-margin: 60px;
+  --grid-gap: 24px;
+  --grid-max-width: 1280px;
+}

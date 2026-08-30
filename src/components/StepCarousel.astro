@@ -1,0 +1,257 @@
+---
+// A step-level image carousel — added 29 Aug 2026 for Carrier Scorecard's
+// Launch step (two shipped views: the table and the chart). Distinct from
+// `images` (which stacks every entry full-width, one after another) and
+// from `beforeAfter` (a fixed two-image comparison slider): this is for
+// N images that are alternate views of the same thing, shown one at a
+// time, auto-advancing on a timer with manual prev/next arrows. Full-width
+// like every other step visual (`--grid-max-width`/`--grid-margin`).
+import { Image } from "astro:assets";
+import type { ImageMetadata } from "astro";
+
+interface CarouselImage {
+  src: ImageMetadata;
+  alt: string;
+}
+
+interface Props {
+  images: CarouselImage[];
+}
+
+const { images } = Astro.props;
+---
+
+{images.length > 0 && (
+  <div class="step__carousel" data-carousel data-reveal>
+    <div class="step__carousel-track">
+      {images.map((image, index) => (
+        <figure class="step__carousel-slide" data-carousel-slide data-active={index === 0 ? "true" : undefined}>
+          <Image
+            src={image.src}
+            alt={image.alt}
+            widths={[480, 900, 1600]}
+            sizes="(min-width: 1600px) 1600px, 100vw"
+            class="step__carousel-image"
+          />
+        </figure>
+      ))}
+    </div>
+
+    {images.length > 1 && (
+      <>
+        <button type="button" class="step__carousel-arrow step__carousel-arrow--prev" data-carousel-prev aria-label="Previous slide">
+          <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+        <button type="button" class="step__carousel-arrow step__carousel-arrow--next" data-carousel-next aria-label="Next slide">
+          <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+        <div class="step__carousel-dots" role="tablist" aria-label="Slides">
+          {images.map((_, index) => (
+            <button
+              type="button"
+              class="step__carousel-dot"
+              data-carousel-dot
+              data-active={index === 0 ? "true" : undefined}
+              aria-label={`Go to slide ${index + 1}`}
+            />
+          ))}
+        </div>
+      </>
+    )}
+  </div>
+)}
+
+<script>
+  // Auto-advances every 5s; a manual prev/next/dot click jumps immediately
+  // and resets the timer, so manual control never fights the automatic
+  // one. Pauses while the tab is hidden so a background tab doesn't burn
+  // through slides unseen. One shared init, safe to call more than once
+  // per page (multiple carousels, or an astro:page-load re-run).
+  function initCarousels() {
+    const carousels = document.querySelectorAll<HTMLElement>("[data-carousel]");
+
+    carousels.forEach((carousel) => {
+      if (carousel.dataset.carouselInit) return;
+      carousel.dataset.carouselInit = "true";
+
+      const slides = Array.from(carousel.querySelectorAll<HTMLElement>("[data-carousel-slide]"));
+      const dots = Array.from(carousel.querySelectorAll<HTMLElement>("[data-carousel-dot]"));
+      const prevBtn = carousel.querySelector<HTMLButtonElement>("[data-carousel-prev]");
+      const nextBtn = carousel.querySelector<HTMLButtonElement>("[data-carousel-next]");
+      if (slides.length < 2) return;
+
+      let index = 0;
+      let timer: ReturnType<typeof setInterval> | null = null;
+
+      const show = (next: number) => {
+        index = (next + slides.length) % slides.length;
+        slides.forEach((slide, i) => {
+          if (i === index) {
+            slide.setAttribute("data-active", "true");
+          } else {
+            slide.removeAttribute("data-active");
+          }
+        });
+        dots.forEach((dot, i) => {
+          if (i === index) {
+            dot.setAttribute("data-active", "true");
+          } else {
+            dot.removeAttribute("data-active");
+          }
+        });
+      };
+
+      const start = () => {
+        stop();
+        timer = setInterval(() => show(index + 1), 5000);
+      };
+
+      const stop = () => {
+        if (timer) clearInterval(timer);
+        timer = null;
+      };
+
+      const manual = (next: number) => {
+        show(next);
+        start();
+      };
+
+      prevBtn?.addEventListener("click", () => manual(index - 1));
+      nextBtn?.addEventListener("click", () => manual(index + 1));
+      dots.forEach((dot, i) => dot.addEventListener("click", () => manual(i)));
+
+      document.addEventListener("visibilitychange", () => {
+        if (document.hidden) stop();
+        else start();
+      });
+
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (!reduceMotion) start();
+    });
+  }
+
+  document.addEventListener("astro:page-load", initCarousels);
+  initCarousels();
+</script>
+
+<style>
+  .step__carousel {
+    position: relative;
+    max-width: var(--grid-max-width);
+    margin-inline: auto;
+    padding-inline: var(--grid-margin);
+  }
+
+  .step__carousel-track {
+    position: relative;
+    /* Matches the source images' own ratio (not a generic 16:9 guess) so
+       `object-fit: cover` shows the full frame with zero crop — set this
+       to whatever ratio the actual carousel images share when reusing
+       this component elsewhere. */
+    aspect-ratio: 3957 / 3381;
+    overflow: hidden;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+  }
+
+  .step__carousel-slide {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    opacity: 0;
+    transition: opacity 0.6s var(--ease-out-expo);
+  }
+
+  .step__carousel-slide[data-active] {
+    opacity: 1;
+  }
+
+  .step__carousel-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .step__carousel-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: var(--radius-full);
+    background: var(--color-scrim);
+    color: var(--color-fg-bright);
+    cursor: pointer;
+    transition: background-color 0.2s var(--ease-out-expo);
+  }
+
+  .step__carousel-arrow svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .step__carousel-arrow:hover,
+  .step__carousel-arrow:focus-visible {
+    background: var(--case-accent);
+    color: var(--color-bg);
+  }
+
+  .step__carousel-arrow--prev {
+    left: calc(var(--grid-margin) + var(--space-4));
+  }
+
+  .step__carousel-arrow--next {
+    right: calc(var(--grid-margin) + var(--space-4));
+  }
+
+  .step__carousel-dots {
+    position: absolute;
+    bottom: var(--space-4);
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: var(--space-2);
+  }
+
+  .step__carousel-dot {
+    width: 20px;
+    height: 8px;
+    padding: 0;
+    border: none;
+    border-radius: var(--radius-full);
+    background: var(--color-scrim);
+    cursor: pointer;
+    transform: scaleX(0.4);
+    transform-origin: left center;
+    transition: background-color 0.2s var(--ease-out-expo), transform 0.2s var(--ease-out-expo);
+  }
+
+  .step__carousel-dot[data-active] {
+    background: var(--case-accent);
+    transform: scaleX(1);
+  }
+
+  @media (max-width: 720px) {
+    .step__carousel-arrow {
+      width: 32px;
+      height: 32px;
+    }
+
+    .step__carousel-arrow--prev {
+      left: var(--space-3);
+    }
+
+    .step__carousel-arrow--next {
+      right: var(--space-3);
+    }
+  }
+</style>

@@ -1,0 +1,624 @@
+---
+// Renders the scan / impact / process layers from PORTFOLIO-STRATEGY.md as
+// sections on one page — see PORTFOLIO-IA.md ("depth-layered, not
+// URL-separated"). First real visual treatment for this template, built
+// against Applicants Manager; the image-bearing fields are all optional so
+// the other five (still-TODO) case studies keep rendering — see the
+// direction contract in BaseLayout.astro and DESIGN.md's case-study notes.
+import { Image } from "astro:assets";
+import type { ImageMetadata } from "astro";
+import BaseLayout from "./BaseLayout.astro";
+import CaseStudyKPIs from "../components/CaseStudyKPIs.astro";
+import CaseStudyStep from "../components/CaseStudyStep.astro";
+import { formatInline } from "../utils/formatInline";
+
+interface Metric {
+  label: string;
+  value: string;
+}
+
+interface StepImage {
+  src: ImageMetadata;
+  alt: string;
+}
+
+interface StepItem {
+  title: string;
+  body: string;
+}
+
+interface Step {
+  title: string;
+  label?: string;
+  body?: string[];
+  items?: StepItem[];
+  highlights?: string[];
+  quotes?: { text: string; attribution?: string }[];
+  stats?: { value: string; label?: string }[];
+  images?: StepImage[];
+  interstitialImage?: StepImage;
+  leadImage?: StepImage;
+  inlineImage?: StepImage & { caption?: string };
+  beforeAfter?: { before: StepImage; after: StepImage };
+  video?: { src: string; caption?: string; loop?: boolean };
+  carousel?: StepImage[];
+  gif?: { src: string; alt: string };
+}
+
+interface Quote {
+  text: string;
+  attribution?: string;
+}
+
+interface ProjectLink {
+  slug: string;
+  title: string;
+}
+
+interface Props {
+  title: string;
+  oneLiner: string;
+  headlineStat: string;
+  role: string;
+  timeline: string;
+  platform?: string;
+  industry?: string;
+  accentColor?: string;
+  problem: string;
+  objective: string;
+  outcome: string;
+  metrics: Metric[];
+  heroImage?: { src: ImageMetadata; alt: string };
+  quote?: Quote;
+  briefImages?: StepImage[];
+  interstitialAfterKPIs?: StepImage;
+  steps?: Step[];
+  prevProject?: ProjectLink | null;
+  nextProject?: ProjectLink | null;
+}
+
+const {
+  title,
+  oneLiner,
+  headlineStat,
+  role,
+  timeline,
+  platform,
+  industry,
+  accentColor,
+  problem,
+  objective,
+  outcome,
+  metrics,
+  heroImage,
+  quote,
+  briefImages = [],
+  interstitialAfterKPIs,
+  steps = [],
+  prevProject,
+  nextProject,
+} = Astro.props;
+
+const metaFields = [
+  { label: "Role", value: role },
+  { label: "Timeline", value: timeline },
+  ...(platform ? [{ label: "Platform", value: platform }] : []),
+  ...(industry ? [{ label: "Industry", value: industry }] : []),
+];
+
+const [titleFirstWord, ...titleRestWords] = title.split(" ");
+const titleRest = titleRestWords.join(" ");
+
+// Figma breaks the subtitle onto two lines with a manual line break at the
+// first comma, not a width-driven wrap — mirrored here at the template
+// level (not baked into the `oneLiner` content field, which other
+// surfaces like the Home work-list item render as one unbroken line).
+const [subtitleFirst, ...subtitleRestParts] = oneLiner.split(", ");
+const subtitleRest = subtitleRestParts.join(", ");
+
+const caseStyle = accentColor ? `--case-accent: ${accentColor}` : undefined;
+---
+
+<BaseLayout title={title}>
+  <div class="case-study" style={caseStyle}>
+    <div class="grid-12">
+      <header class="case-study__header">
+        <h1 class="case-study__title">
+          <span class="case-study__title-accent">{titleFirstWord}</span>
+          {titleRest && <span> {titleRest}</span>}
+        </h1>
+        <p class="case-study__subtitle">
+          {subtitleRest ? (
+            <>
+              <Fragment set:html={formatInline(subtitleFirst)} />,<br />
+              <Fragment set:html={formatInline(subtitleRest)} />
+            </>
+          ) : (
+            <Fragment set:html={formatInline(oneLiner)} />
+          )}
+        </p>
+        <p class="case-study__headline-stat">{headlineStat}</p>
+        <dl class="meta">
+          {metaFields.map((field, index) => (
+            <div class="meta__field" data-reveal style={`--reveal-delay: ${index * 80}ms`}>
+              <dt>{field.label}</dt>
+              <dd>{field.value}</dd>
+            </div>
+          ))}
+        </dl>
+      </header>
+    </div>
+
+    {heroImage && (
+      <div class="grid-12">
+        <Image
+          src={heroImage.src}
+          alt={heroImage.alt}
+          widths={[640, 1200, 1920]}
+          sizes="(min-width: 1600px) 1600px, 100vw"
+          class="hero-image"
+          data-reveal
+          priority
+        />
+      </div>
+    )}
+
+    <!-- Impact layer: brief + KPIs. A hiring manager can stop here. -->
+    <section class="brief" aria-labelledby="brief-heading">
+      <div class="grid-12">
+        <div class="brief__grid" data-reveal>
+          <h2 id="brief-heading" class="brief__label">Brief</h2>
+          <div class="brief__content">
+            <p set:html={formatInline(problem)} />
+            <p set:html={formatInline(objective)} />
+
+            {quote && (
+              <blockquote class="pull-quote" data-reveal style="--reveal-delay: 120ms">
+                <p>&ldquo;<Fragment set:html={formatInline(quote.text)} />&rdquo;</p>
+                {quote.attribution && <cite>{quote.attribution}</cite>}
+              </blockquote>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {briefImages.length > 0 && (
+        <div class="grid-12">
+          <div class:list={["brief__images", { "brief__images--pair": briefImages.length > 1 }]}>
+            {briefImages.map((image, index) => (
+              <figure class="brief__figure" data-reveal style={`--reveal-delay: ${index * 100}ms`}>
+                <Image
+                  src={image.src}
+                  alt=""
+                  widths={[480, 900, 1600]}
+                  sizes={briefImages.length > 1 ? "(min-width: 720px) 50vw, 100vw" : "(min-width: 1600px) 1600px, 100vw"}
+                  class="brief__image"
+                />
+                <figcaption class="brief__caption">{image.alt}</figcaption>
+              </figure>
+            ))}
+          </div>
+        </div>
+      )}
+    </section>
+
+    <div class="grid-12">
+      <CaseStudyKPIs metrics={metrics} />
+    </div>
+
+    {interstitialAfterKPIs && (
+      <div class="grid-12">
+        <Image
+          src={interstitialAfterKPIs.src}
+          alt={interstitialAfterKPIs.alt}
+          widths={[640, 1200, 1920]}
+          sizes="(min-width: 1600px) 1600px, 100vw"
+          class="interstitial-image"
+          data-reveal
+        />
+      </div>
+    )}
+
+    <!-- Process layer: the steps, for anyone who wants to keep reading.
+         No visible "Process" heading here: Figma has no section divider
+         between the brief/KPI layer and the numbered steps; each step's
+         own number + label (in CaseStudyStep.astro) is the only heading
+         treatment. aria-label keeps the region navigable for screen
+         readers without a visual label. -->
+    {steps.length > 0 ? (
+      <section class="case-process" aria-label="Process">
+        {steps.map((step, index) => (
+          <>
+            <CaseStudyStep
+              index={index + 1}
+              title={step.title}
+              label={step.label}
+              body={step.body}
+              items={step.items}
+              highlights={step.highlights}
+              quotes={step.quotes}
+              stats={step.stats}
+              images={step.images}
+              leadImage={step.leadImage}
+              inlineImage={step.inlineImage}
+              beforeAfter={step.beforeAfter}
+              video={step.video}
+              carousel={step.carousel}
+              gif={step.gif}
+            />
+            {step.interstitialImage && (
+              <div class="grid-12">
+                <Image
+                  src={step.interstitialImage.src}
+                  alt={step.interstitialImage.alt}
+                  widths={[640, 1200, 1920]}
+                  sizes="(min-width: 1600px) 1600px, 100vw"
+                  class="interstitial-image"
+                  data-reveal
+                />
+              </div>
+            )}
+          </>
+        ))}
+      </section>
+    ) : (
+      <div class="container">
+        <section aria-labelledby="process-heading">
+          <h2 id="process-heading">Process</h2>
+          <slot />
+        </section>
+      </div>
+    )}
+
+    {(prevProject || nextProject) && (
+      <div class="grid-12">
+        <nav class="case-nav" aria-label="Case study navigation" data-reveal>
+          {prevProject ? (
+            <a class="case-nav__link case-nav__link--prev" href={`/work/${prevProject.slug}`}>
+              <span class="case-nav__label">
+                <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                Previous
+              </span>
+              <span class="case-nav__title">{prevProject.title}</span>
+            </a>
+          ) : <span />}
+          {nextProject && (
+            <a class="case-nav__link case-nav__link--next" href={`/work/${nextProject.slug}`}>
+              <span class="case-nav__label">
+                Next
+                <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </span>
+              <span class="case-nav__title">{nextProject.title}</span>
+            </a>
+          )}
+        </nav>
+      </div>
+    )}
+  </div>
+</BaseLayout>
+
+<style>
+  .case-study {
+    padding-block: var(--case-title-gap) var(--space-6);
+  }
+
+  .case-study__header {
+    grid-column: 1 / -1;
+  }
+
+  .case-study__title {
+    font-family: var(--font-display);
+    font-size: var(--type-title-size);
+    line-height: var(--type-title-line);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0;
+    margin: 0;
+  }
+
+  .case-study__title-accent {
+    color: var(--case-accent);
+  }
+
+  .case-study__subtitle {
+    font-family: var(--font-sans);
+    font-size: var(--type-subtitle-size);
+    line-height: var(--type-subtitle-line);
+    font-weight: 400;
+    color: var(--color-fg);
+    margin: var(--space-4) 0 0;
+  }
+
+  .case-study__headline-stat {
+    font-family: var(--font-sans);
+    font-size: var(--type-body-lg-size);
+    line-height: var(--type-body-lg-line);
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    color: var(--case-accent);
+    margin: var(--space-4) 0 0;
+  }
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: var(--space-7);
+    margin: var(--space-6) 0 0;
+  }
+
+  .meta__field {
+    flex: 1 0 200px;
+    min-width: 0;
+    margin: 0;
+    padding: var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-case);
+  }
+
+  .meta dt {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: var(--type-caption-size);
+    line-height: var(--type-caption-line);
+    letter-spacing: var(--tracking-caption);
+    text-transform: uppercase;
+    color: var(--color-caption);
+    margin-bottom: var(--space-1);
+  }
+
+  .meta dd {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: var(--type-body-sm-size);
+    line-height: var(--type-body-sm-line);
+    color: var(--color-fg-bright);
+  }
+
+  .hero-image {
+    grid-column: 1 / -1;
+    display: block;
+    width: 100%;
+    height: auto;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+  }
+
+  .hero-image:hover {
+    --hover-scale: 1.01;
+  }
+
+  .brief__grid {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: var(--grid-gap);
+  }
+
+  .brief__label {
+    grid-column: span 4;
+    font-family: var(--font-display);
+    font-size: var(--type-title-size);
+    line-height: var(--type-title-line);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0;
+    color: var(--case-accent);
+    margin: 0;
+  }
+
+  .brief__content {
+    grid-column: span 7;
+  }
+
+  .brief p {
+    font-family: var(--font-sans);
+    font-size: var(--type-body-size);
+    line-height: var(--type-body-line);
+    color: var(--color-fg);
+  }
+
+  .pull-quote {
+    margin: var(--space-7) 0;
+    padding: 0;
+    border: none;
+  }
+
+  .pull-quote p {
+    font-family: var(--font-sans);
+    font-size: var(--type-quote-size);
+    font-weight: 600;
+    line-height: var(--type-quote-line);
+    color: var(--color-fg-bright);
+    margin: 0 0 var(--space-3);
+  }
+
+  .pull-quote cite {
+    display: block;
+    font-style: normal;
+    font-size: var(--type-body-sm-size);
+    line-height: var(--type-body-sm-line);
+    color: var(--color-caption);
+  }
+
+  .interstitial-image {
+    grid-column: 1 / -1;
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius-sm);
+  }
+
+  .interstitial-image:hover {
+    --hover-scale: 1.01;
+  }
+
+  .brief__images {
+    grid-column: 1 / -1;
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .brief__images--pair {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .brief__figure {
+    margin: 0;
+  }
+
+  .brief__image {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    transition: transform 0.4s var(--ease-out-expo);
+  }
+
+  .brief__image:hover {
+    transform: scale(1.02);
+  }
+
+  .brief__caption {
+    font-size: var(--text-small);
+    color: var(--color-fg-muted);
+    margin-top: var(--space-2);
+  }
+
+  .case-nav {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-5);
+    padding-bottom: var(--space-6);
+  }
+
+  .case-nav__link {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    text-decoration: none;
+    color: var(--color-fg);
+    transition: color 0.2s var(--ease-out-expo);
+  }
+
+  .case-nav__link--next {
+    text-align: right;
+    align-items: flex-end;
+    grid-column: 2;
+  }
+
+  .case-nav__link:hover,
+  .case-nav__link:focus-visible {
+    color: var(--color-accent);
+  }
+
+  .case-nav__label {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-small);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--color-fg-muted);
+  }
+
+  .case-nav__label svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .case-nav__title {
+    font-family: var(--font-display);
+    font-size: var(--type-subtitle-size);
+    line-height: var(--type-subtitle-line);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+
+  @media (max-width: 720px) {
+    .brief__grid {
+      grid-template-columns: 1fr;
+      gap: var(--space-3);
+    }
+
+    .brief__label,
+    .brief__content {
+      grid-column: 1 / -1;
+    }
+
+    .brief__images--pair {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .case-nav__link--next {
+      grid-column: auto;
+      text-align: left;
+      align-items: flex-start;
+    }
+  }
+</style>
+
+<script>
+  import Lenis from "lenis";
+
+  // Same eased/inertial scroll as Home (src/pages/index.astro) — plain
+  // default Lenis config, no sticky/pin trickery (that's Home's hero-cover
+  // effect specifically, not part of this page). Skipped under
+  // prefers-reduced-motion, same rule as everywhere else motion shows up
+  // on this site.
+  function initSmoothScroll() {
+    if (document.documentElement.dataset.lenisInit) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    document.documentElement.dataset.lenisInit = "true";
+
+    const lenis = new Lenis();
+    const raf = (time: number) => {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    };
+    requestAnimationFrame(raf);
+  }
+
+  // One-shot scroll reveal for anything marked [data-reveal] (see
+  // global.css) — images, brief/step text, grouped cards. Deliberately
+  // NOT a replay like Home's hero: this is a long page read top to
+  // bottom once, not a hero that gets scrolled past and back to.
+  function initScrollReveals() {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const elements = document.querySelectorAll<HTMLElement>("[data-reveal]");
+    if (elements.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-visible");
+            observer.unobserve(entry.target);
+          }
+        }
+      },
+      { threshold: 0.15, rootMargin: "0px 0px -80px 0px" },
+    );
+
+    elements.forEach((el) => observer.observe(el));
+  }
+
+  function init() {
+    initSmoothScroll();
+    initScrollReveals();
+  }
+
+  document.addEventListener("astro:page-load", init);
+  init();
+</script>

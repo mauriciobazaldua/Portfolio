@@ -1,0 +1,102 @@
+---
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import "@fontsource/space-grotesk/400.css";
+import "@fontsource/space-grotesk/500.css";
+import "@fontsource/space-grotesk/600.css";
+import "@fontsource/space-grotesk/700.css";
+import "@fontsource/manrope/400.css";
+import "@fontsource/manrope/500.css";
+import "@fontsource/manrope/600.css";
+import "@fontsource/ibm-plex-mono/400.css";
+import "../styles/global.css";
+
+interface Props {
+  title: string;
+  // Home is its own committed dark world with a minimal floating nav, not
+  // the conventional Header/Footer — see PORTFOLIO-IA.md.
+  noChrome?: boolean;
+}
+
+const { title, noChrome = false } = Astro.props;
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title} — Mauricio Bazaldua</title>
+    <!-- Scroll-reveal ([data-reveal], see global.css) is hidden by default
+         and needs JS to add the .is-visible class. With JS disabled that
+         would hide content permanently, so this unconditionally overrides
+         it back to visible — the reduced-motion case is handled separately
+         in global.css and doesn't need JS either. -->
+    <noscript>
+      <style>
+        [data-reveal] {
+          opacity: 1 !important;
+          transform: none !important;
+        }
+      </style>
+    </noscript>
+  </head>
+  <body>
+    <!--
+    THESIS: The homepage is a title screen you scroll past, not stop at —
+    an elegant, restrained arrival, then the real substance: the work.
+    OWN-WORLD: Near-black warm ground, one amber glow, one geometric sans
+    display face (Space Grotesk, uppercase/tracked) at scale for
+    name/headline, Manrope for reading text. Committed dark end
+    to end (hero and list both), unlike the sitewide light/dark-adaptive
+    pages.
+    STORY: A visitor arrives to a quiet, confident moment — name, one
+    line — then scrolls into a numbered list of real work, each row
+    earning its place through what it says, not a card template.
+    FIRST VIEWPORT: Full-height hero (100dvh, adaptive not fixed), name +
+    subtitle fading in on load and replaying whenever scrolled back into
+    view, a slow ambient gradient drifting behind, a minimal About/Contact
+    nav — no menu chrome, no illustrated character.
+    FORM: Built directly from two user-supplied references
+    (karanthakur.online's structure, Destiny 2's restraint) plus explicit
+    answers to every open question — shaped directly per this skill's own
+    rule for precisely-specified briefs, not rolled against the catalog.
+    Redesign: retires "Title Screen" entirely, see DESIGN.md.
+    FINISH: unreviewed and undocumented is unfinished; this build ends with
+    the finish review, the verdict, DESIGN.md, and every shipping raster
+    carrying its provenance.
+    -->
+    <!--
+    CASE-STUDY SURFACE (src/layouts/CaseStudyLayout.astro):
+    THESIS: A case study is evidence, not a poster — every section lets
+    three different readers (recruiter, hiring manager, designer peer)
+    stop at the depth they need, refusing the hero-screenshot-plus-prose
+    template that buries proof below the fold.
+    OWN-WORLD: The sitewide adaptive Paper palette (never Home's fixed
+    dark/amber world), Manrope body, Space Grotesk uppercase headings —
+    a quiet editorial reading world.
+    STORY: Land, read meta + main image + brief, understand the work's
+    shape immediately; the KPI grid proves it worked; Steps let anyone
+    who wants more keep going, without forcing that depth on someone
+    who doesn't.
+    FIRST VIEWPORT: Back-link, title, subtitle, headline stat, meta row
+    (Role/Timeline/Platform/Industry), then the main image —
+    user-specified structure, modeled on karanthakur.online/work/tint.
+    FORM: Shaped directly per this skill's precisely-specified-request
+    rule — no concept-seed tournament; structure is fixed by the brief.
+    FINISH: unreviewed and undocumented is unfinished; this build ends
+    with the finish review, the verdict, DESIGN.md, and every shipping
+    raster carrying its provenance.
+    -->
+    {noChrome ? (
+      <slot />
+    ) : (
+      <>
+        <Header />
+        <main>
+          <slot />
+        </main>
+        <Footer />
+      </>
+    )}
+  </body>
+</html>

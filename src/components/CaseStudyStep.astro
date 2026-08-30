@@ -1,0 +1,477 @@
+---
+// One numbered phase of the case-study's process section — Karan Thakur's
+// /work/tint structure (numbered heading + prose, or a grid of sub-items
+// for a "Key problems"-style step, plus captioned images) adapted to this
+// site's own Paper/type system. See CaseStudyLayout.astro for how steps
+// are assembled from the `steps` content-collection field.
+import { Image } from "astro:assets";
+import type { ImageMetadata } from "astro";
+import BeforeAfterSlider from "./BeforeAfterSlider.astro";
+import StepCarousel from "./StepCarousel.astro";
+import { formatInline } from "../utils/formatInline";
+
+interface StepImage {
+  src: ImageMetadata;
+  alt: string;
+}
+
+interface StepItem {
+  title: string;
+  body: string;
+}
+
+interface StepStat {
+  value: string;
+  label?: string;
+}
+
+interface StepQuote {
+  text: string;
+  attribution?: string;
+}
+
+interface Props {
+  index: number;
+  title: string;
+  label?: string;
+  body?: string[];
+  items?: StepItem[];
+  highlights?: string[];
+  quotes?: StepQuote[];
+  stats?: StepStat[];
+  images?: StepImage[];
+  leadImage?: StepImage;
+  inlineImage?: StepImage & { caption?: string };
+  beforeAfter?: { before: StepImage; after: StepImage };
+  video?: { src: string; caption?: string; loop?: boolean };
+  carousel?: StepImage[];
+  gif?: { src: string; alt: string };
+}
+
+const {
+  index,
+  title,
+  label,
+  body = [],
+  items,
+  highlights,
+  quotes,
+  stats,
+  images = [],
+  leadImage,
+  inlineImage,
+  beforeAfter,
+  video,
+  carousel,
+  gif,
+} = Astro.props;
+const number = String(index).padStart(2, "0");
+---
+
+<section class="step" aria-label={label ? `${number}. ${label}: ${title}` : title}>
+  <div class="step__grid">
+    <div class="step__number-col" data-reveal>
+      <span class="step__number" aria-hidden="true">{number}</span>
+      {label && <span class="step__label">{label}</span>}
+    </div>
+    <div
+      class:list={["step__text", { "step__text--prose": !items || items.length === 0 }]}
+      data-reveal
+      style="--reveal-delay: 80ms"
+    >
+      {items && items.length > 0 ? (
+        <div class="step__items">
+          {items.map((item, index) => (
+            <div class="step__item" data-reveal style={`--reveal-delay: ${80 + index * 80}ms`}>
+              <h4 class="step__item-title">{item.title}</h4>
+              <p class="step__item-body" set:html={formatInline(item.body)} />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <>
+          {body.map((paragraph) => <p class="step__paragraph" set:html={formatInline(paragraph)} />)}
+          {quotes && quotes.length > 0 && (
+            <div class="step__quotes">
+              {quotes.map((quote, index) => (
+                <blockquote class="step__quote" data-reveal style={`--reveal-delay: ${160 + index * 60}ms`}>
+                  <p>&ldquo;<Fragment set:html={formatInline(quote.text)} />&rdquo;</p>
+                  {quote.attribution && <cite class="step__quote-attribution">{quote.attribution}</cite>}
+                </blockquote>
+              ))}
+            </div>
+          )}
+          {highlights && highlights.length > 0 && (
+            <ul class="step__highlights">
+              {highlights.map((highlight, index) => (
+                <li
+                  class="step__highlight"
+                  data-reveal
+                  style={`--reveal-delay: ${160 + index * 60}ms`}
+                  set:html={formatInline(highlight)}
+                />
+              ))}
+            </ul>
+          )}
+          {stats && stats.length > 0 && (
+            <div class="step__stats" data-reveal style="--reveal-delay: 200ms">
+              {stats.map((stat) => (
+                <div class="step__stat">
+                  <span class="step__stat-value">{stat.value}</span>
+                  {stat.label && <span class="step__stat-label">{stat.label}</span>}
+                </div>
+              ))}
+            </div>
+          )}
+          {inlineImage && (
+            <figure class="step__inline-image" data-reveal>
+              <Image
+                src={inlineImage.src}
+                alt={inlineImage.alt}
+                widths={[320, 640, 960]}
+                sizes="(min-width: 720px) 420px, 70vw"
+                class="step__inline-image-img"
+              />
+              {inlineImage.caption && <figcaption class="step__inline-image-caption">{inlineImage.caption}</figcaption>}
+            </figure>
+          )}
+        </>
+      )}
+    </div>
+  </div>
+
+  {leadImage && (
+    <div class="step__lead-image" data-reveal>
+      <Image
+        src={leadImage.src}
+        alt={leadImage.alt}
+        widths={[480, 900, 1600]}
+        sizes="(min-width: 1600px) 1600px, 100vw"
+        class="step__image"
+      />
+    </div>
+  )}
+
+  {beforeAfter && (
+    <div class="step__before-after" data-reveal>
+      <BeforeAfterSlider before={beforeAfter.before} after={beforeAfter.after} />
+    </div>
+  )}
+
+  {images.length > 0 && (
+    <div class="step__images">
+      {images.map((image, index) => (
+        <figure class="step__figure" data-reveal style={`--reveal-delay: ${index * 100}ms`}>
+          <Image
+            src={image.src}
+            alt={image.alt}
+            widths={[480, 900, 1600]}
+            sizes="(min-width: 1600px) 1600px, 100vw"
+            class="step__image"
+          />
+        </figure>
+      ))}
+    </div>
+  )}
+
+  {video && (
+    <figure class="step__video-wrap" data-reveal>
+      {video.loop ? (
+        <video
+          class="step__video"
+          src={video.src}
+          aria-label={video.caption}
+          autoplay
+          muted
+          loop
+          playsinline
+          preload="auto"
+        />
+      ) : (
+        <video class="step__video" src={video.src} controls preload="metadata" aria-label={video.caption} />
+      )}
+    </figure>
+  )}
+
+  {gif && (
+    <figure class="step__gif-wrap" data-reveal>
+      <img class="step__gif" src={gif.src} alt={gif.alt} loading="lazy" />
+    </figure>
+  )}
+
+  {carousel && carousel.length > 0 && <StepCarousel images={carousel} />}
+</section>
+
+<style>
+  .step__grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: var(--grid-gap);
+    max-width: var(--grid-max-width);
+    margin-inline: auto;
+    padding-inline: var(--grid-margin);
+  }
+
+  .step__number-col {
+    grid-column: span 4;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .step__text {
+    grid-column: span 8;
+  }
+
+  .step__text--prose {
+    grid-column: span 7;
+  }
+
+  .step__number {
+    display: block;
+    font-family: var(--font-display);
+    font-size: var(--type-title-size);
+    line-height: var(--type-title-line);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    color: var(--case-accent);
+  }
+
+  .step__label {
+    font-family: var(--font-sans);
+    font-size: var(--type-subtitle-size);
+    line-height: var(--type-subtitle-line);
+    color: var(--color-caption);
+    white-space: pre-line;
+  }
+
+  .step__paragraph {
+    font-family: var(--font-sans);
+    font-size: var(--type-body-size);
+    line-height: var(--type-body-line);
+    color: var(--color-fg);
+  }
+
+  .step__paragraph:last-child {
+    margin-bottom: 0;
+  }
+
+  .step__highlights {
+    list-style: none;
+    margin: var(--space-6) 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .step__highlight {
+    padding-left: var(--space-4);
+    border-left: 2px solid var(--case-accent);
+    font-family: var(--font-sans);
+    font-size: var(--type-body-size);
+    line-height: var(--type-body-line);
+    color: var(--color-fg-bright);
+  }
+
+  .step__quotes {
+    margin: var(--space-6) 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+  }
+
+  .step__quote {
+    margin: 0;
+    padding-left: var(--space-4);
+    border-left: 2px solid var(--case-accent);
+  }
+
+  .step__quote p {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: var(--type-body-size);
+    line-height: var(--type-body-line);
+    color: var(--color-fg-bright);
+  }
+
+  .step__quote-attribution {
+    display: block;
+    margin-top: var(--space-1);
+    font-style: normal;
+    font-size: var(--type-body-sm-size);
+    line-height: var(--type-body-sm-line);
+    color: var(--color-caption);
+  }
+
+  .step__stats {
+    margin: var(--space-6) 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-6);
+  }
+
+  .step__stat {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .step__stat-value {
+    font-family: var(--font-display);
+    font-size: var(--type-quote-size);
+    line-height: 1.25;
+    font-weight: 500;
+    color: var(--case-accent);
+  }
+
+  .step__stat-label {
+    font-family: var(--font-sans);
+    font-size: var(--type-body-sm-size);
+    line-height: var(--type-body-sm-line);
+    color: var(--color-caption);
+  }
+
+  .step__items {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-4);
+  }
+
+  .step__item {
+    padding: var(--space-5);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-case);
+  }
+
+  .step__item-title {
+    font-family: var(--font-display);
+    font-size: var(--type-label-size);
+    line-height: var(--type-label-line);
+    letter-spacing: var(--tracking-caption);
+    text-transform: uppercase;
+    font-weight: 400;
+    color: var(--color-fg-bright);
+    margin: 0 0 var(--space-2);
+  }
+
+  .step__item-body {
+    font-family: var(--font-sans);
+    font-size: var(--type-body-size);
+    line-height: var(--type-body-line);
+    color: var(--color-caption);
+    margin: 0;
+  }
+
+  .step__before-after {
+    max-width: var(--grid-max-width);
+    margin-inline: auto;
+    padding-inline: var(--grid-margin);
+  }
+
+  .step__images {
+    max-width: var(--grid-max-width);
+    margin-inline: auto;
+    padding-inline: var(--grid-margin);
+    display: grid;
+    gap: var(--case-section-gap);
+  }
+
+  .step__figure {
+    margin: 0;
+  }
+
+  .step__image {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    transition: transform 0.4s var(--ease-out-expo);
+  }
+
+  .step__image:hover {
+    transform: scale(1.02);
+  }
+
+  .step__lead-image {
+    max-width: var(--grid-max-width);
+    margin-inline: auto;
+    padding-inline: var(--grid-margin);
+  }
+
+  /* Sits inside .step__text (the 7/8-col content column, not full-bleed)
+     — deliberately smaller and not stretched to the column's own width,
+     so a process artifact (a photo of a physical sketch) reads as an
+     inset object next to the prose, not another polished full-width
+     product shot. */
+  .step__inline-image {
+    margin: var(--space-6) 0 0;
+    max-width: 22rem;
+  }
+
+  .step__inline-image-img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+  }
+
+  .step__inline-image-caption {
+    margin-top: var(--space-2);
+    font-size: var(--type-body-sm-size);
+    line-height: var(--type-body-sm-line);
+    color: var(--color-caption);
+  }
+
+  .step__video-wrap {
+    max-width: var(--grid-max-width);
+    margin-inline: auto;
+    padding-inline: var(--grid-margin);
+  }
+
+  .step__video {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface-card);
+  }
+
+  .step__gif-wrap {
+    max-width: var(--grid-max-width);
+    margin-inline: auto;
+    padding-inline: var(--grid-margin);
+  }
+
+  .step__gif {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+  }
+
+  @media (max-width: 720px) {
+    .step__grid {
+      grid-template-columns: 1fr;
+      gap: var(--space-4);
+    }
+
+    .step__number-col,
+    .step__text,
+    .step__text--prose {
+      grid-column: 1 / -1;
+    }
+
+    .step__number {
+      font-size: var(--text-headline);
+    }
+
+    .step__items {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

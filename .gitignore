@@ -1,0 +1,24 @@
+# Build output
+dist/
+.astro/
+portfolio-netlify-deploy.zip
+
+# Raw source exports (123MB+) — already copied into src/assets/ at build
+# quality; not needed for Netlify to build the site, so kept out of the
+# repo to keep clones/pushes fast.
+Images/
+Old portfolio/
+
+# Dependencies
+node_modules/
+
+# Environment
+.env
+.env.production
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+
+# Logs
+npm-debug.log*

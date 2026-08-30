@@ -1,0 +1,145 @@
+---
+// The "KPI/Goals achieved" row — reuses the existing `metrics` field so
+// case studies without it (still-TODO stubs) simply render nothing here,
+// no separate content field needed.
+// 25 Aug 2026, matched to Figma: bordered/filled cards (#1c1c1c surface),
+// 64px value in the page's --case-accent, bright (not muted) label —
+// replaced the earlier hairline-divider treatment. See DESIGN.md.
+interface Metric {
+  label: string;
+  value: string;
+}
+
+interface Props {
+  metrics: Metric[];
+}
+
+const { metrics } = Astro.props;
+
+// Count-up animation target: split "+60%" into prefix "+", target "60",
+// suffix "%". A value with no digits (e.g. "Live") has no match, so it's
+// left static — the counter script skips anything without this attribute.
+function parseCount(value: string) {
+  const match = value.match(/\d+(\.\d+)?/);
+  if (!match || match.index === undefined) return null;
+  return {
+    prefix: value.slice(0, match.index),
+    target: match[0],
+    suffix: value.slice(match.index + match[0].length),
+  };
+}
+---
+
+{metrics.length > 0 && (
+  <div class="kpis">
+    {metrics.map((metric, index) => {
+      const count = parseCount(metric.value);
+      return (
+        <div class="kpis__item" data-reveal style={`--reveal-delay: ${index * 80}ms`}>
+          <p
+            class="kpis__value"
+            data-count-prefix={count?.prefix}
+            data-count-suffix={count?.suffix}
+            data-count-target={count?.target}
+          >
+            {metric.value}
+          </p>
+          <p class="kpis__label">{metric.label}</p>
+        </div>
+      );
+    })}
+  </div>
+)}
+
+<script>
+  function initKpiCounters() {
+    const values = document.querySelectorAll<HTMLElement>(".kpis__value[data-count-target]");
+    if (values.length === 0) return;
+
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    const animate = (el: HTMLElement) => {
+      if (el.dataset.counted) return;
+      el.dataset.counted = "true";
+
+      const target = Number(el.dataset.countTarget);
+      const prefix = el.dataset.countPrefix ?? "";
+      const suffix = el.dataset.countSuffix ?? "";
+      if (prefersReducedMotion || Number.isNaN(target)) return;
+
+      const duration = 1200;
+      const start = performance.now();
+
+      const step = (now: number) => {
+        const progress = Math.min((now - start) / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        el.textContent = `${prefix}${Math.round(target * eased)}${suffix}`;
+        if (progress < 1) {
+          requestAnimationFrame(step);
+        } else {
+          el.textContent = `${prefix}${target}${suffix}`;
+        }
+      };
+
+      el.textContent = `${prefix}0${suffix}`;
+      requestAnimationFrame(step);
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            animate(entry.target as HTMLElement);
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.4 },
+    );
+
+    values.forEach((el) => observer.observe(el));
+  }
+
+  document.addEventListener("astro:page-load", initKpiCounters);
+  initKpiCounters();
+</script>
+
+<style>
+  .kpis {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--space-4);
+  }
+
+  .kpis__item {
+    padding: var(--space-6) var(--space-6);
+    background: var(--color-surface-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-case);
+  }
+
+  .kpis__value {
+    font-family: var(--font-display);
+    font-size: var(--type-stat-size);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    color: var(--case-accent);
+    line-height: var(--type-stat-line);
+    margin: 0 0 var(--space-3);
+  }
+
+  .kpis__label {
+    font-family: var(--font-sans);
+    font-size: var(--type-body-size);
+    line-height: var(--type-body-line);
+    color: var(--color-fg-bright);
+    margin: 0;
+  }
+
+  @media (max-width: 640px) {
+    .kpis {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

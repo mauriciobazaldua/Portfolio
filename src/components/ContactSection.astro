@@ -1,0 +1,209 @@
+---
+// Home page's contact block — added 28 Aug 2026, replacing the plain
+// FloatingNav-only contact affordance with a dedicated section (reference:
+// a Karan Thakur-style row list — circled icon, bold label, muted detail
+// line, external-link arrow, each row full-width and border-separated).
+// Home still has no dedicated /contact page (PORTFOLIO-IA.md's deliberate
+// "mailto/LinkedIn on every page, not a destination" decision) — this is
+// a same-page section, not a route.
+import { contact, resumeHref } from "../lib/site";
+
+const rows = [
+  {
+    label: "Email me",
+    detail: contact.email,
+    href: `mailto:${contact.email}`,
+    external: false,
+    icon: "mail",
+  },
+  {
+    label: "Resume",
+    detail: "Download resume",
+    href: resumeHref,
+    external: false,
+    icon: "file",
+    download: true,
+  },
+  {
+    label: "LinkedIn",
+    detail: contact.linkedin.replace(/^https?:\/\/(www\.)?linkedin\.com\/in\//, "").replace(/\/$/, ""),
+    href: contact.linkedin,
+    external: true,
+    icon: "linkedin",
+  },
+];
+---
+
+<section class="contact" id="contact" aria-label="Contact">
+  <div class="contact__inner">
+    <h2 class="contact__headline">Contact <span class="contact__headline-accent">me.</span></h2>
+
+    <div class="contact__list">
+      {rows.map((row) => (
+        <a
+          class="contact__row"
+          href={row.href}
+          target={row.external ? "_blank" : undefined}
+          rel={row.external ? "noopener" : undefined}
+          download={row.download ? true : undefined}
+        >
+          <span class="contact__icon" aria-hidden="true">
+            {row.icon === "mail" && (
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.5" />
+                <path d="M4 7l8 6 8-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            )}
+            {row.icon === "file" && (
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" />
+                <path d="M14 3v5h5" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" />
+                <path d="M9 13h6M9 17h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+              </svg>
+            )}
+            {row.icon === "linkedin" && (
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="3" y="3" width="18" height="18" rx="3" stroke="currentColor" stroke-width="1.5" />
+                <path d="M8 10.5v6M8 7.99v.01M12.5 16.5v-3.5c0-1.1.7-2 2-2s2 .9 2 2v3.5M12.5 16.5v-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            )}
+          </span>
+
+          <span class="contact__text">
+            <span class="contact__label">{row.label}</span>
+            <span class="contact__detail">{row.detail}</span>
+          </span>
+
+          <svg class="contact__arrow" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M4 12L12 4M12 4H5M12 4v7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </a>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .contact {
+    position: relative;
+    z-index: 1;
+    background: var(--home-bg);
+    color: var(--home-fg);
+    /* Top padding is the exact 80px gap from .work above — see the
+       comment on .work in index.astro. Bottom padding is this page's own
+       closing whitespace, not an inter-section gap, so it keeps its
+       original value. */
+    padding: 80px var(--space-5) var(--space-8);
+  }
+
+  .contact__inner {
+    max-width: var(--container-max-wide);
+    margin: 0 auto;
+  }
+
+  .contact__headline {
+    font-family: var(--font-display);
+    font-size: var(--text-display);
+    font-weight: 700;
+    line-height: var(--leading-tight);
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    color: var(--home-fg);
+    margin: 0 0 var(--space-8);
+  }
+
+  .contact__headline-accent {
+    color: var(--home-accent);
+  }
+
+  .contact__list {
+    border-top: 1px solid var(--home-border);
+  }
+
+  .contact__row {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: var(--space-5);
+    padding: var(--space-6) 0;
+    border-bottom: 1px solid var(--home-border);
+    text-decoration: none;
+    color: var(--home-fg);
+    transition: background-color 0.3s var(--ease-out-expo);
+  }
+
+  .contact__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--home-border);
+    color: var(--home-fg-muted);
+    transition: color 0.3s var(--ease-out-expo), border-color 0.3s var(--ease-out-expo);
+  }
+
+  .contact__icon svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .contact__text {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .contact__label {
+    font-family: var(--font-display);
+    font-size: var(--text-title);
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+  }
+
+  .contact__detail {
+    color: var(--home-fg-tertiary);
+  }
+
+  .contact__arrow {
+    width: 20px;
+    height: 20px;
+    color: var(--home-fg-muted);
+    transition: color 0.3s var(--ease-out-expo), transform 0.3s var(--ease-out-expo);
+  }
+
+  .contact__row:hover,
+  .contact__row:focus-visible {
+    color: var(--home-accent);
+  }
+
+  .contact__row:hover .contact__icon,
+  .contact__row:focus-visible .contact__icon {
+    color: var(--home-accent);
+    border-color: var(--home-accent);
+  }
+
+  .contact__row:hover .contact__arrow,
+  .contact__row:focus-visible .contact__arrow {
+    color: var(--home-accent);
+    transform: translate(2px, -2px);
+  }
+
+  .contact__row:focus-visible {
+    outline: 2px solid var(--home-accent);
+    outline-offset: 4px;
+  }
+
+  @media (max-width: 640px) {
+    .contact__row {
+      grid-template-columns: auto 1fr;
+      gap: var(--space-4);
+    }
+
+    .contact__arrow {
+      display: none;
+    }
+  }
+</style>

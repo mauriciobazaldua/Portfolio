@@ -1,0 +1,221 @@
+---
+// Interactive before/after comparison — added 25 Aug 2026 for the
+// Applicants Manager Figma rebuild's step 04. UX pattern referenced from
+// https://before-after-slider.framer.website/ (not fetched, a well-known
+// pattern: two stacked images, one clipped by a draggable divider).
+// Vanilla JS below, no dependency — mouse, touch, and keyboard all drive
+// the same --pct custom property.
+import { Image } from "astro:assets";
+import type { ImageMetadata } from "astro";
+
+interface Props {
+  before: { src: ImageMetadata; alt: string };
+  after: { src: ImageMetadata; alt: string };
+}
+
+const { before, after } = Astro.props;
+---
+
+<div class="ba-slider" data-ba-slider style="--pct: 50%">
+  <span class="ba-slider__pill ba-slider__pill--before">BEFORE</span>
+  <span class="ba-slider__pill ba-slider__pill--after">AFTER</span>
+
+  <Image
+    src={after.src}
+    alt={after.alt}
+    widths={[480, 900, 1600]}
+    sizes="(min-width: 1600px) 1600px, 100vw"
+    class="ba-slider__layer ba-slider__layer--after"
+  />
+  <Image
+    src={before.src}
+    alt={before.alt}
+    widths={[480, 900, 1600]}
+    sizes="(min-width: 1600px) 1600px, 100vw"
+    class="ba-slider__layer ba-slider__layer--before"
+    data-ba-before-layer
+  />
+
+  <div class="ba-slider__divider" data-ba-divider>
+    <button
+      type="button"
+      class="ba-slider__handle"
+      data-ba-handle
+      role="slider"
+      aria-label="Drag to compare before and after"
+      aria-valuemin="0"
+      aria-valuemax="100"
+      aria-valuenow="50"
+    >
+      <svg viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <rect width="56" height="56" rx="28" fill="#131313" />
+        <path
+          d="M35.5 40V16M31 20.5L35.5 16L40 20.5M20.5 16V40M16 35.5L20.5 40L25 35.5"
+          stroke="#F9F9F9"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+    </button>
+  </div>
+</div>
+
+<script>
+  function initBeforeAfterSliders() {
+    const sliders = document.querySelectorAll<HTMLElement>("[data-ba-slider]");
+
+    sliders.forEach((slider) => {
+      if (slider.dataset.baInit) return;
+      slider.dataset.baInit = "true";
+
+      const handle = slider.querySelector<HTMLButtonElement>("[data-ba-handle]");
+      const beforeLayer = slider.querySelector<HTMLElement>("[data-ba-before-layer]");
+      if (!handle || !beforeLayer) return;
+
+      const setPct = (pct: number) => {
+        const clamped = Math.min(100, Math.max(0, pct));
+        slider.style.setProperty("--pct", `${clamped}%`);
+        handle.setAttribute("aria-valuenow", String(Math.round(clamped)));
+      };
+
+      const pctFromClientX = (clientX: number) => {
+        const rect = slider.getBoundingClientRect();
+        return ((clientX - rect.left) / rect.width) * 100;
+      };
+
+      let dragging = false;
+
+      const onPointerMove = (event: PointerEvent) => {
+        if (!dragging) return;
+        setPct(pctFromClientX(event.clientX));
+      };
+
+      const stopDragging = () => {
+        dragging = false;
+        window.removeEventListener("pointermove", onPointerMove);
+        window.removeEventListener("pointerup", stopDragging);
+      };
+
+      const startDragging = (event: PointerEvent) => {
+        dragging = true;
+        setPct(pctFromClientX(event.clientX));
+        window.addEventListener("pointermove", onPointerMove);
+        window.addEventListener("pointerup", stopDragging);
+      };
+
+      handle.addEventListener("pointerdown", startDragging);
+      slider.addEventListener("pointerdown", (event) => {
+        if (event.target === handle || handle.contains(event.target as Node)) return;
+        startDragging(event as PointerEvent);
+      });
+
+      handle.addEventListener("keydown", (event) => {
+        const current = Number(handle.getAttribute("aria-valuenow") ?? 50);
+        if (event.key === "ArrowLeft") {
+          setPct(current - 2);
+          event.preventDefault();
+        } else if (event.key === "ArrowRight") {
+          setPct(current + 2);
+          event.preventDefault();
+        } else if (event.key === "Home") {
+          setPct(0);
+          event.preventDefault();
+        } else if (event.key === "End") {
+          setPct(100);
+          event.preventDefault();
+        }
+      });
+    });
+  }
+
+  document.addEventListener("astro:page-load", initBeforeAfterSliders);
+  initBeforeAfterSliders();
+</script>
+
+<style>
+  .ba-slider {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: var(--radius-sm);
+    touch-action: none;
+    user-select: none;
+  }
+
+  .ba-slider__layer {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    pointer-events: none;
+  }
+
+  .ba-slider__layer--before {
+    clip-path: inset(0 calc(100% - var(--pct)) 0 0);
+  }
+
+  .ba-slider__divider {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--pct);
+    width: 2px;
+    background: var(--color-fg-bright);
+    transform: translateX(-50%);
+    pointer-events: none;
+  }
+
+  .ba-slider__handle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 56px;
+    height: 56px;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: ew-resize;
+    pointer-events: auto;
+  }
+
+  .ba-slider__handle svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .ba-slider__handle:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 4px;
+    border-radius: var(--radius-full);
+  }
+
+  .ba-slider__pill {
+    position: absolute;
+    top: var(--space-4);
+    z-index: 1;
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--radius-full);
+    background: var(--color-scrim);
+    font-family: var(--font-display);
+    font-size: var(--type-label-size);
+    line-height: var(--type-label-line);
+    letter-spacing: var(--tracking-caption);
+    text-transform: uppercase;
+    color: var(--color-fg-bright);
+    pointer-events: none;
+  }
+
+  .ba-slider__pill--before {
+    left: var(--space-4);
+  }
+
+  .ba-slider__pill--after {
+    right: var(--space-4);
+  }
+</style>

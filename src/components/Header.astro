@@ -1,0 +1,93 @@
+---
+// Global nav per PORTFOLIO-IA.md: Works, plus a Contact CTA (not a nav
+// item). This header only renders on non-Home pages — Home has its own
+// minimal floating nav (FloatingNav.astro). Items match FloatingNav's
+// exactly (Works, Contact) — About removed sitewide 29 Aug 2026 (page
+// deleted, no longer a route); no separate "Home" link since the brand
+// mark and Works both already lead back to "/". Works points at "/#work"
+// (Home's project list) and Contact at "/#contact" (ContactSection at the
+// bottom of Home, added 30 Aug 2026 — was a mailto link straight to the
+// inbox, now lands on the section with Email/Resume/LinkedIn so a visitor
+// picks how to reach out) — both full navigations to Home's own anchors,
+// no JS needed here since Lenis isn't running until Home's own script
+// loads.
+//
+// 25 Aug 2026, matched to the case-study Figma: brand splits into "MAU"
+// (sitewide orange — the brand mark stays orange even on a page with its
+// own accent color, e.g. Applicants Manager's blue) + "BAZALDUA" (bright
+// white).
+const navItems = [{ href: "/#work", label: "Works" }];
+---
+
+<header class="site-header">
+  <a class="site-header__brand" href="/">
+    <span class="site-header__brand-mark">MAU</span> <span class="site-header__brand-rest">BAZALDUA</span>
+  </a>
+  <nav class="site-header__nav" aria-label="Primary">
+    {navItems.map((item) => (
+      <a href={item.href}>{item.label}</a>
+    ))}
+  </nav>
+  <a class="site-header__contact" href="/#contact">Contact</a>
+</header>
+
+<style>
+  .site-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    row-gap: var(--space-2);
+    column-gap: var(--space-4);
+    max-width: var(--container-max-full);
+    margin-inline: auto;
+    padding: var(--space-4) var(--container-padding);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .site-header__brand {
+    font-family: var(--font-display);
+    font-weight: 500;
+    text-decoration: none;
+    margin-right: auto;
+  }
+
+  .site-header__brand-mark {
+    color: var(--color-accent);
+  }
+
+  .site-header__brand-rest {
+    color: var(--color-fg-bright);
+  }
+
+  .site-header__nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-5);
+  }
+
+  .site-header__nav a {
+    font-family: var(--font-sans);
+    font-size: var(--text-small);
+    color: var(--color-caption);
+    text-decoration: none;
+    transition: color 0.2s var(--ease-out-expo);
+  }
+
+  .site-header__nav a:hover {
+    color: var(--color-accent);
+  }
+
+  .site-header__contact {
+    padding: var(--space-2) var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-case);
+    text-decoration: none;
+    color: var(--color-fg-bright);
+    transition: border-color 0.2s var(--ease-out-expo), color 0.2s var(--ease-out-expo);
+  }
+
+  .site-header__contact:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+</style>
